@@ -734,7 +734,7 @@ async function init3D(){
     cam.fov=state.fov;cam.updateProjectionMatrix();
     if(!reduced){
       /* ослабленный параллакс */
-      const par=radius*.02;
+      const par=radius*.01;
       cam.translateX(mouse.x*par);
       cam.translateY(-mouse.y*par*.5);
       cam.rotateY(mouse.x*.008);

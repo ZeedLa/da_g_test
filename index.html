@@ -14,11 +14,16 @@
             box-sizing: border-box;
         }
 
+        html, body {
+            overflow: hidden;
+            height: 100%;
+            width: 100%;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
             background: #000;
             color: #fff;
-            overflow-x: hidden;
         }
 
         #canvas-container {
@@ -31,17 +36,35 @@
         }
 
         .content {
-            position: relative;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             z-index: 2;
+            pointer-events: none;
         }
 
-        section {
-            min-height: 100vh;
-            position: relative;
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            padding: 80px;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 80px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+            pointer-events: none;
+        }
+
+        .screen.active {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
         }
 
         /* Header */
@@ -65,6 +88,7 @@
         .logo img {
             width: 120px;
             height: auto;
+            display: block;
         }
 
         .nav {
@@ -88,8 +112,8 @@
             opacity: 0.6;
         }
 
-        /* Section 1 */
-        .section-1 {
+        /* Screen 1 */
+        .screen-1 {
             align-items: flex-end;
             justify-content: space-between;
             padding-bottom: 80px;
@@ -121,8 +145,8 @@
             color: #000;
         }
 
-        /* Sections 2-4 */
-        .section-2, .section-3, .section-4 {
+        /* Screens 2-4 */
+        .screen-2, .screen-3, .screen-4 {
             flex-direction: column;
             text-align: center;
         }
@@ -135,10 +159,11 @@
             margin-bottom: 40px;
         }
 
-        /* Section 5 */
-        .section-5 {
+        /* Screen 5 - slider */
+        .screen-5 {
             flex-direction: column;
-            padding: 80px 40px;
+            padding: 120px 40px 40px;
+            justify-content: center;
         }
 
         .slider-container {
@@ -280,6 +305,32 @@
             color: #000;
         }
 
+        /* Scroll indicator */
+        .scroll-indicator {
+            position: fixed;
+            right: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 50;
+        }
+
+        .scroll-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .scroll-dot.active {
+            background: #fff;
+            transform: scale(1.4);
+        }
+
         @media (max-width: 1024px) {
             .product-card {
                 min-width: calc(50% - 12px);
@@ -291,12 +342,16 @@
                 min-width: 100%;
             }
             
-            section {
+            .screen {
                 padding: 40px 20px;
             }
             
             .header {
                 padding: 20px;
+            }
+
+            .scroll-indicator {
+                right: 20px;
             }
         }
     </style>
@@ -309,40 +364,48 @@
             <img src="DALOGO.svg" alt="DALOGO">
         </div>
         <nav class="nav">
-            <a href="#collection">Коллекция</a>
-            <a href="#about">О бренде</a>
-            <a href="#lookbook">Lookbook</a>
-            <a href="#stores">Магазины</a>
-            <a href="#contact">Контакты</a>
+            <a href="#">Коллекция</a>
+            <a href="#">О бренде</a>
+            <a href="#">Lookbook</a>
+            <a href="#">Магазины</a>
+            <a href="#">Контакты</a>
         </nav>
     </div>
 
+    <div class="scroll-indicator">
+        <div class="scroll-dot active" data-index="0"></div>
+        <div class="scroll-dot" data-index="1"></div>
+        <div class="scroll-dot" data-index="2"></div>
+        <div class="scroll-dot" data-index="3"></div>
+        <div class="scroll-dot" data-index="4"></div>
+    </div>
+
     <div class="content">
-        <section class="section-1">
+        <section class="screen screen-1 active">
             <h1 class="title-main">первая<br>коллекция</h1>
-            <button class="btn-outline" onclick="scrollToSection(2)">смотреть</button>
+            <button class="btn-outline" data-goto="1">смотреть</button>
         </section>
 
-        <section class="section-2">
+        <section class="screen screen-2">
             <div class="text-content">
                 Минимализм как философия. Каждая деталь продумана, каждый шов имеет значение. Мы создаём одежду, которая говорит тишиной.
             </div>
         </section>
 
-        <section class="section-3">
+        <section class="screen screen-3">
             <div class="text-content">
                 Качество без компромиссов. Натуральные ткани, ручная работа, внимание к каждому миллиметру. Это не просто одежда — это искусство.
             </div>
         </section>
 
-        <section class="section-4">
+        <section class="screen screen-4">
             <div class="text-content">
                 Лимитированная коллекция. Только 100 экземпляров каждой модели. Стань частью истории.
             </div>
-            <button class="btn-outline" onclick="scrollToSection(5)">купить</button>
+            <button class="btn-outline" data-goto="4">купить</button>
         </section>
 
-        <section class="section-5">
+        <section class="screen screen-5">
             <div class="slider-container">
                 <div class="slider" id="slider">
                     <div class="product-card">
@@ -450,187 +513,378 @@
     <script type="module">
         import * as THREE from 'three';
         import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-
-        let scene, camera, renderer, gltf;
-        let cameras = [];
-        let currentCameraIndex = 0;
-        let targetCameraIndex = 0;
-        let cameraTransitionProgress = 0;
-        let isTransitioning = false;
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { BokehPass } from 'three/addons/postprocessing/BokehPass.js';
 
         const container = document.getElementById('canvas-container');
+        const screens = document.querySelectorAll('.screen');
+        const scrollDots = document.querySelectorAll('.scroll-dot');
+        const TOTAL_SCREENS = screens.length;
+
+        let scene, camera, renderer, composer;
+        let bokehPass = null;
+        let gltfScene = null;
+        let cameras = []; // массив {position, quaternion, fov, hasDoF}
+        let currentScreen = 0;
+        let targetScreen = 0;
+        let isTransitioning = false;
+        let transitionProgress = 0;
+
+        // Виртуальная камера для интерполяции
+        let activeCam = {
+            position: new THREE.Vector3(),
+            quaternion: new THREE.Quaternion(),
+            fov: 75
+        };
 
         function init() {
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x000000);
 
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            
+            camera.position.set(0, 0, 10);
+
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             container.appendChild(renderer.domElement);
 
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            // Postprocessing для depth of field
+            composer = new EffectComposer(renderer);
+            const renderPass = new RenderPass(scene, camera);
+            composer.addPass(renderPass);
+
+            bokehPass = new BokehPass(scene, camera, {
+                focus: 10.0,
+                aperture: 0.0,
+                maxblur: 0.01
+            });
+            bokehPass.enabled = false;
+            composer.addPass(bokehPass);
+
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
             scene.add(ambientLight);
 
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            directionalLight.position.set(5, 5, 5);
-            scene.add(directionalLight);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(5, 10, 7);
+            scene.add(dirLight);
 
             const loader = new GLTFLoader();
-            loader.load('dagolf_scene.glb', (loadedGltf) => {
-                gltf = loadedGltf;
-                scene.add(gltf.scene);
+            loader.load('dagolf_scene.glb', (gltf) => {
+                gltfScene = gltf.scene;
+                scene.add(gltfScene);
 
+                // Собираем камеры из GLB
                 gltf.cameras.forEach((cam, index) => {
-                    cameras.push(cam);
+                    const pos = new THREE.Vector3();
+                    const quat = new THREE.Quaternion();
+                    cam.getWorldPosition(pos);
+                    cam.getWorldQuaternion(quat);
+                    
+                    // Определяем DoF по имени камеры
+                    const name = (cam.name || '').toLowerCase();
+                    const hasDoF = name.includes('camera3') || name.includes('camera4') || 
+                                   name.includes('cam3') || name.includes('cam4');
+
+                    cameras.push({
+                        position: pos,
+                        quaternion: quat,
+                        fov: cam.fov || 75,
+                        hasDoF: hasDoF
+                    });
                 });
 
-                if (cameras.length > 0) {
-                    camera = cameras[0];
-                    currentCameraIndex = 0;
+                // Если камер в GLB меньше 4 — дополним виртуальными
+                while (cameras.length < 4) {
+                    const i = cameras.length;
+                    cameras.push({
+                        position: new THREE.Vector3(
+                            Math.cos(i * Math.PI / 2) * 15,
+                            2 + i * 2,
+                            Math.sin(i * Math.PI / 2) * 15
+                        ),
+                        quaternion: new THREE.Quaternion().setFromEuler(
+                            new THREE.Euler(0, -i * Math.PI / 2, 0)
+                        ),
+                        fov: 75,
+                        hasDoF: i >= 2
+                    });
                 }
+
+                // Инициализируем активную камеру на Camera1
+                activeCam.position.copy(cameras[0].position);
+                activeCam.quaternion.copy(cameras[0].quaternion);
+                activeCam.fov = cameras[0].fov;
+                applyActiveCam();
 
                 animate();
             }, undefined, (error) => {
-                console.error('Error loading GLB:', error);
+                console.error('GLB load error:', error);
                 createFallbackScene();
                 animate();
             });
 
-            window.addEventListener('resize', onWindowResize);
-            window.addEventListener('scroll', onScroll);
+            window.addEventListener('resize', onResize);
+            setupScroll();
+            setupUI();
         }
 
         function createFallbackScene() {
-            const geometry = new THREE.TorusKnotGeometry(10, 3, 100, 16);
-            const material = new THREE.MeshStandardMaterial({ 
-                color: 0x444444,
-                metalness: 0.5,
-                roughness: 0.5
+            const geometry = new THREE.TorusKnotGeometry(3, 1, 200, 32);
+            const material = new THREE.MeshStandardMaterial({
+                color: 0x222222,
+                metalness: 0.7,
+                roughness: 0.3
             });
-            const torusKnot = new THREE.Mesh(geometry, material);
-            scene.add(torusKnot);
+            const mesh = new THREE.Mesh(geometry, material);
+            scene.add(mesh);
 
             for (let i = 0; i < 4; i++) {
-                const cam = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-                cam.position.set(
-                    Math.cos(i * Math.PI / 2) * 30,
-                    10 + i * 5,
-                    Math.sin(i * Math.PI / 2) * 30
-                );
-                cam.lookAt(0, 0, 0);
-                cameras.push(cam);
+                cameras.push({
+                    position: new THREE.Vector3(
+                        Math.cos(i * Math.PI / 2) * 10,
+                        2 + i * 1.5,
+                        Math.sin(i * Math.PI / 2) * 10
+                    ),
+                    quaternion: new THREE.Quaternion().setFromEuler(
+                        new THREE.Euler(0, -i * Math.PI / 2, 0)
+                    ),
+                    fov: 75,
+                    hasDoF: i >= 2
+                });
             }
-            camera = cameras[0];
+            activeCam.position.copy(cameras[0].position);
+            activeCam.quaternion.copy(cameras[0].quaternion);
+            activeCam.fov = cameras[0].fov;
+            applyActiveCam();
         }
 
-        function onWindowResize() {
+        function applyActiveCam() {
+            camera.position.copy(activeCam.position);
+            camera.quaternion.copy(activeCam.quaternion);
+            if (camera.fov !== activeCam.fov) {
+                camera.fov = activeCam.fov;
+                camera.updateProjectionMatrix();
+            }
+        }
+
+        function onResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
+            composer.setSize(window.innerWidth, window.innerHeight);
         }
 
-        function onScroll() {
-            const scrollPosition = window.scrollY;
-            const windowHeight = window.innerHeight;
-            
-            let targetIndex = 0;
-            if (scrollPosition > windowHeight * 0.5) targetIndex = 1;
-            if (scrollPosition > windowHeight * 1.5) targetIndex = 2;
-            if (scrollPosition > windowHeight * 2.5) targetIndex = 3;
+        function setupScroll() {
+            let lastWheelTime = 0;
+            const WHEEL_COOLDOWN = 700; // мс между переключениями
 
-            if (targetIndex !== currentCameraIndex && targetIndex < cameras.length) {
-                targetCameraIndex = targetIndex;
-                isTransitioning = true;
-                cameraTransitionProgress = 0;
+            window.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                if (isTransitioning) return;
+
+                const now = Date.now();
+                if (now - lastWheelTime < WHEEL_COOLDOWN) return;
+                lastWheelTime = now;
+
+                const delta = Math.sign(e.deltaY);
+                const next = targetScreen + delta;
+                if (next < 0 || next >= TOTAL_SCREENS) return;
+
+                goToScreen(next);
+            }, { passive: false });
+
+            // Тач-скролл
+            let touchStartY = 0;
+            window.addEventListener('touchstart', (e) => {
+                touchStartY = e.touches[0].clientY;
+            });
+            window.addEventListener('touchend', (e) => {
+                const touchEndY = e.changedTouches[0].clientY;
+                const diff = touchStartY - touchEndY;
+                if (Math.abs(diff) < 50) return;
+                if (isTransitioning) return;
+                const delta = diff > 0 ? 1 : -1;
+                const next = targetScreen + delta;
+                if (next < 0 || next >= TOTAL_SCREENS) return;
+                goToScreen(next);
+            });
+
+            // Клавиатура
+            window.addEventListener('keydown', (e) => {
+                if (isTransitioning) return;
+                if (e.key === 'ArrowDown' || e.key === ' ') {
+                    e.preventDefault();
+                    const next = targetScreen + 1;
+                    if (next < TOTAL_SCREENS) goToScreen(next);
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    const next = targetScreen - 1;
+                    if (next >= 0) goToScreen(next);
+                }
+            });
+        }
+
+        function setupUI() {
+            // Кнопки перехода между экранами
+            document.querySelectorAll('[data-goto]').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const idx = parseInt(btn.dataset.goto);
+                    if (!isNaN(idx) && idx !== targetScreen && !isTransitioning) {
+                        goToScreen(idx);
+                    }
+                });
+            });
+
+            // Точки-индикаторы
+            scrollDots.forEach(dot => {
+                dot.addEventListener('click', () => {
+                    const idx = parseInt(dot.dataset.index);
+                    if (!isNaN(idx) && idx !== targetScreen && !isTransitioning) {
+                        goToScreen(idx);
+                    }
+                });
+            });
+
+            // Слайдер
+            const slider = document.getElementById('slider');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            let currentSlide = 0;
+            const slidesToShow = 4;
+
+            function updateSlider() {
+                const firstCard = slider.children[0];
+                if (!firstCard) return;
+                const slideWidth = firstCard.offsetWidth + 24;
+                slider.style.transform = `translateX(-${currentSlide * slideWidth}px)`;
             }
+
+            nextBtn.addEventListener('click', () => {
+                const maxSlide = slider.children.length - slidesToShow;
+                if (currentSlide < maxSlide) {
+                    currentSlide++;
+                    updateSlider();
+                }
+            });
+
+            prevBtn.addEventListener('click', () => {
+                if (currentSlide > 0) {
+                    currentSlide--;
+                    updateSlider();
+                }
+            });
+
+            window.addEventListener('resize', updateSlider);
+
+            // Размеры
+            document.querySelectorAll('.size-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const parent = e.target.closest('.product-info');
+                    parent.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                });
+            });
+
+            // Корзина
+            document.querySelectorAll('.add-to-cart').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const card = e.target.closest('.product-card');
+                    const name = card.querySelector('.product-name').textContent;
+                    const sizeBtn = card.querySelector('.size-btn.active');
+                    const size = sizeBtn ? sizeBtn.dataset.size : 'Не выбран';
+                    alert(`Добавлено в корзину:\n${name}\nРазмер: ${size}`);
+                });
+            });
         }
 
-        function updateCameraTransition() {
-            if (!isTransitioning || cameras.length === 0) return;
+        function goToScreen(index) {
+            if (index < 0 || index >= TOTAL_SCREENS || index === targetScreen) return;
 
-            cameraTransitionProgress += 0.02;
+            // Сохраняем текущее состояние как старт интерполяции
+            const fromPos = activeCam.position.clone();
+            const fromQuat = activeCam.quaternion.clone();
+            const fromFov = activeCam.fov;
 
-            if (cameraTransitionProgress >= 1) {
-                cameraTransitionProgress = 1;
+            currentScreen = targetScreen;
+            targetScreen = index;
+            isTransitioning = true;
+            transitionProgress = 0;
+
+            // Обновляем UI
+            screens.forEach((s, i) => {
+                s.classList.toggle('active', i === targetScreen);
+            });
+            scrollDots.forEach((d, i) => {
+                d.classList.toggle('active', i === targetScreen);
+            });
+
+            // Запоминаем "откуда" для анимации
+            activeCam._fromPos = fromPos;
+            activeCam._fromQuat = fromQuat;
+            activeCam._fromFov = fromFov;
+        }
+
+        function updateCameraTransition(delta) {
+            if (!isTransitioning) return;
+
+            transitionProgress += delta * 1.2; // скорость перехода
+            if (transitionProgress >= 1) {
+                transitionProgress = 1;
                 isTransitioning = false;
-                currentCameraIndex = targetCameraIndex;
-                camera = cameras[currentCameraIndex];
-            } else {
-                const fromCamera = cameras[currentCameraIndex];
-                const toCamera = cameras[targetCameraIndex];
+                currentScreen = targetScreen;
+            }
 
-                camera.position.lerpVectors(fromCamera.position, toCamera.position, cameraTransitionProgress);
-                
-                const fromQuat = new THREE.Quaternion();
-                fromCamera.getWorldQuaternion(fromQuat);
-                const toQuat = new THREE.Quaternion();
-                toCamera.getWorldQuaternion(toQuat);
-                camera.quaternion.slerpQuaternions(fromQuat, toQuat, cameraTransitionProgress);
+            const target = cameras[Math.min(targetScreen, cameras.length - 1)];
+            const fromPos = activeCam._fromPos || cameras[currentScreen].position;
+            const fromQuat = activeCam._fromQuat || cameras[currentScreen].quaternion;
+            const fromFov = activeCam._fromFov || cameras[currentScreen].fov;
+
+            // easeInOutCubic
+            const t = transitionProgress;
+            const ease = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+            activeCam.position.lerpVectors(fromPos, target.position, ease);
+            activeCam.quaternion.slerpQuaternions(fromQuat, target.quaternion, ease);
+            activeCam.fov = fromFov + (target.fov - fromFov) * ease;
+
+            applyActiveCam();
+
+            // Depth of Field
+            const shouldDoF = target.hasDoF && transitionProgress > 0.3;
+            if (bokehPass) {
+                bokehPass.enabled = shouldDoF;
+                if (shouldDoF) {
+                    // Плавное появление DoF
+                    const dofT = Math.min(1, (transitionProgress - 0.3) / 0.7);
+                    bokehPass.uniforms['aperture'].value = 0.0001 * dofT;
+                    bokehPass.uniforms['maxblur'].value = 0.015 * dofT;
+                    const dist = fromPos.distanceTo(target.position) * 0.5 + 5;
+                    bokehPass.uniforms['focus'].value = dist;
+                }
             }
         }
 
+        let lastTime = performance.now();
         function animate() {
             requestAnimationFrame(animate);
-            updateCameraTransition();
-            renderer.render(scene, camera);
+            const now = performance.now();
+            const delta = Math.min((now - lastTime) / 1000, 0.1);
+            lastTime = now;
+
+            updateCameraTransition(delta);
+
+            if (bokehPass && bokehPass.enabled) {
+                composer.render();
+            } else {
+                renderer.render(scene, camera);
+            }
         }
 
         init();
-
-        window.scrollToSection = function(sectionIndex) {
-            const sections = document.querySelectorAll('section');
-            if (sections[sectionIndex - 1]) {
-                sections[sectionIndex - 1].scrollIntoView({ behavior: 'smooth' });
-            }
-        };
-
-        const slider = document.getElementById('slider');
-        const prevBtn = document.getElementById('prevBtn');
-        const nextBtn = document.getElementById('nextBtn');
-        let currentSlide = 0;
-        const slidesToShow = 4;
-
-        function updateSlider() {
-            const slideWidth = slider.children[0].offsetWidth + 24;
-            slider.style.transform = `translateX(-${currentSlide * slideWidth}px)`;
-        }
-
-        nextBtn.addEventListener('click', () => {
-            const maxSlide = slider.children.length - slidesToShow;
-            if (currentSlide < maxSlide) {
-                currentSlide++;
-                updateSlider();
-            }
-        });
-
-        prevBtn.addEventListener('click', () => {
-            if (currentSlide > 0) {
-                currentSlide--;
-                updateSlider();
-            }
-        });
-
-        document.querySelectorAll('.size-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const parent = e.target.closest('.product-info');
-                parent.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
-            });
-        });
-
-        document.querySelectorAll('.add-to-cart').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const card = e.target.closest('.product-card');
-                const name = card.querySelector('.product-name').textContent;
-                const sizeBtn = card.querySelector('.size-btn.active');
-                const size = sizeBtn ? sizeBtn.dataset.size : 'Не выбран';
-                
-                alert(`Добавлено в корзину:\n${name}\nРазмер: ${size}`);
-            });
-        });
     </script>
 </body>
 </html>

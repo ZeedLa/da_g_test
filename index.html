@@ -8,8 +8,8 @@
   Файлы рядом с этим index.html:
     DALOGO.svg        — логотип (верхний левый угол)
     dagolf_scene.glb  — 3D-сцена, внутри камеры Camera1..Camera4
-  Шрифт: Inter (переменные начертания). Для замены на cygre достаточно
-  поменять --font и класс .display — сетка не поедет.
+  Шрифт: Inter. Для замены на cygre достаточно поменять --display.
+  Навигация: один жест колеса / свайп / стрелки = один экран.
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -26,13 +26,12 @@
   --display:var(--font); /* ← заменить на cygre при подключении */
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
+html,body{height:100%;overflow:hidden}
 body{
   font-family:var(--font);
   font-optical-sizing:auto;
   background:var(--paper);
   color:var(--ink);
-  overflow-x:hidden;
   -webkit-font-smoothing:antialiased;
 }
 ::selection{background:var(--ink);color:var(--paper)}
@@ -50,14 +49,13 @@ img{display:block}
 @keyframes grain{0%{transform:translate(0,0)}25%{transform:translate(-2%,3%)}50%{transform:translate(3%,-2%)}75%{transform:translate(-3%,-3%)}100%{transform:translate(2%,2%)}}
 
 /* ---------- верхняя панель ---------- */
-.topbar{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;align-items:flex-start;padding:26px 34px;transition:background .4s,border-color .4s,padding .4s;border-bottom:1px solid transparent}
-.topbar.scrolled{background:rgba(233,232,227,.82);backdrop-filter:blur(10px);border-color:var(--line);padding:14px 34px}
+.topbar{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;align-items:flex-start;padding:26px 34px}
 .logo img{height:34px;width:auto;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
 .logo:hover img{transform:rotate(-3deg)}
 .logo-txt{font-weight:800;letter-spacing:.06em;font-size:1.35rem}
 .logo-txt sup{font-size:.5em;color:var(--accent)}
 .nav{display:flex;flex-direction:column;align-items:flex-end;gap:7px;text-align:right}
-.nl{position:relative;font-size:.8rem;font-weight:500;letter-spacing:.04em;display:flex;gap:.7em;align-items:baseline;overflow:hidden}
+.nl{position:relative;font-size:.8rem;font-weight:500;letter-spacing:.04em;display:flex;gap:.7em;align-items:baseline}
 .nl sup{font-size:.6rem;font-weight:600;color:var(--accent);letter-spacing:.08em;transition:transform .35s}
 .nl span{display:inline-block;transition:transform .45s cubic-bezier(.2,.9,.25,1)}
 .nl::after{content:'';position:absolute;right:0;bottom:-2px;height:1px;width:100%;background:var(--ink);transform:scaleX(0);transform-origin:right;transition:transform .45s cubic-bezier(.2,.9,.25,1)}
@@ -78,14 +76,14 @@ body.menu-open .mmenu{clip-path:inset(0 0 0% 0)}
 /* ---------- рейл прогресса ---------- */
 .rail{position:fixed;left:34px;bottom:34px;z-index:45;display:flex;flex-direction:column;align-items:center;gap:12px;font-size:.62rem;font-weight:600;letter-spacing:.14em}
 .rail-line{width:1px;height:130px;background:var(--line);position:relative;overflow:hidden}
-.rail-line i{position:absolute;left:0;top:0;width:100%;height:0%;background:var(--ink)}
+.rail-line i{position:absolute;left:0;top:0;width:100%;height:0%;background:var(--ink);transition:height .7s cubic-bezier(.65,.05,.25,1)}
 
-/* ---------- экраны ---------- */
-main{position:relative;z-index:1}
-.scr{min-height:100vh;position:relative;display:flex;flex-direction:column;justify-content:center}
+/* ---------- слои-экраны ---------- */
+.layer{position:fixed;inset:0;z-index:1;transition:opacity .55s ease,transform .7s cubic-bezier(.65,.05,.25,1)}
 
 /* экран 1 */
-.hero{justify-content:flex-end;padding:0 34px 6vh}
+#heroLayer{display:flex;flex-direction:column;justify-content:flex-end;padding:0 34px 6vh;touch-action:none}
+#heroLayer.off{opacity:0;transform:translateY(-2.5%) scale(.985);pointer-events:none}
 .hero-side{position:absolute;left:34px;top:50%;transform:translateY(-50%) rotate(180deg);writing-mode:vertical-rl;font-size:.62rem;font-weight:600;letter-spacing:.3em;color:var(--mut);text-transform:uppercase}
 .hero-bottom{display:flex;justify-content:space-between;align-items:flex-end;gap:3rem}
 .hero-meta{font-size:.72rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);margin-bottom:1.4rem}
@@ -97,7 +95,7 @@ main{position:relative;z-index:1}
 body.ready .h1 .ch{transform:none}
 .hero-right{display:flex;flex-direction:column;align-items:flex-end;gap:1rem;padding-bottom:.6rem}
 .hero-cap{font-size:.62rem;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:var(--mut)}
-.btn{display:inline-flex;align-items:center;gap:.9em;border:1.5px solid var(--ink);background:transparent;color:var(--ink);padding:1.05em 2.4em;font-size:.78rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;transition:background .35s,color .35s;position:relative}
+.btn{display:inline-flex;align-items:center;gap:.9em;border:1.5px solid var(--ink);background:transparent;color:var(--ink);padding:1.05em 2.4em;font-size:.78rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;transition:background .35s,color .35s}
 .btn i{font-style:normal;transition:transform .35s cubic-bezier(.2,.9,.25,1)}
 .btn:hover{background:var(--ink);color:var(--paper)}
 .btn:hover i{transform:translateX(6px)}
@@ -106,18 +104,22 @@ body.ready .h1 .ch{transform:none}
 .cue i::after{content:'';position:absolute;left:0;top:-40%;width:100%;height:40%;background:var(--ink);animation:cue 1.8s cubic-bezier(.6,0,.4,1) infinite}
 @keyframes cue{to{top:110%}}
 
-/* экраны 2–4 */
-.stmt{align-items:center;text-align:center;padding:0 24px}
+/* экраны 2–4: абзац зафиксирован по центру */
+#stmtLayer{display:flex;align-items:center;justify-content:center;text-align:center;padding:0 24px;opacity:0;transform:translateY(26px);pointer-events:none;touch-action:none}
+#stmtLayer.on{opacity:1;transform:none;pointer-events:auto}
 .veil{max-width:620px;padding:3.2rem 3.4rem;background:radial-gradient(closest-side,rgba(233,232,227,.88),rgba(233,232,227,.4) 72%,transparent);backdrop-filter:blur(4px)}
+#stmtInner{transition:opacity .34s ease,transform .34s ease}
+#stmtInner.fade{opacity:0;transform:translateY(-14px)}
 .kicker{display:flex;justify-content:center;align-items:center;gap:.8em;font-size:.66rem;font-weight:600;letter-spacing:.28em;text-transform:uppercase;margin-bottom:1.6rem}
 .kicker b{color:var(--accent)}
 .kicker .ast{color:var(--accent);font-size:1rem;display:inline-block;animation:spin 14s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .txt{font-size:clamp(1.05rem,1.7vw,1.35rem);line-height:1.6;font-weight:430;max-width:44ch;margin:0 auto}
-.stmt .btn{margin-top:2.4rem}
+#stmtInner .btn{margin-top:2.4rem}
 
-/* экран 5 — коллекция */
-.collection{min-height:100vh;background:var(--paper);border-top:1.5px solid var(--ink);justify-content:flex-start;padding:9vh 34px 6vh}
+/* экран 5 — коллекция (выезжает снизу) */
+#colLayer{background:var(--paper);border-top:1.5px solid var(--ink);transform:translateY(103%);overflow-y:auto;touch-action:pan-y;padding:9vh 34px 6vh;transition:transform .75s cubic-bezier(.65,.05,.25,1)}
+#colLayer.on{transform:none}
 .col-head{display:flex;justify-content:space-between;align-items:flex-end;gap:2rem;margin-bottom:3rem;flex-wrap:wrap}
 .col-title{font-family:var(--display);font-weight:230;text-transform:uppercase;letter-spacing:-.03em;font-size:clamp(1.9rem,4.4vw,3.6rem);line-height:1}
 .col-title small{display:block;font-size:.66rem;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--mut);margin-top:.9rem}
@@ -129,7 +131,7 @@ body.ready .h1 .ch{transform:none}
 .slider{overflow:hidden}
 .track{display:flex;gap:24px;transition:transform .7s cubic-bezier(.22,.85,.25,1)}
 .card{flex:0 0 calc((100% - 72px)/4);opacity:0;transform:translateY(26px);transition:opacity .7s,transform .7s;transition-delay:var(--d,0s)}
-.collection.in .card{opacity:1;transform:none}
+#colLayer.in .card{opacity:1;transform:none}
 .card-img{position:relative;aspect-ratio:3/3.9;background:var(--paper-2);border:1px solid var(--line);overflow:hidden}
 .card-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:opacity .5s ease,transform .8s cubic-bezier(.2,.8,.2,1)}
 .card-img .back{opacity:0}
@@ -151,9 +153,10 @@ body.ready .h1 .ch{transform:none}
 .col-note b{color:var(--accent)}
 .col-foot{margin-top:5rem;padding-top:1.6rem;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:1rem;font-size:.66rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);flex-wrap:wrap}
 
-/* появление */
+/* появления */
 .rv{opacity:0;transform:translateY(22px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.8,.2,1);transition-delay:var(--d,0s)}
 .rv.in{opacity:1;transform:none}
+#colLayer.in .rv{opacity:1;transform:none}
 
 /* тост */
 #toast{position:fixed;left:50%;bottom:30px;transform:translate(-50%,180%);z-index:90;background:var(--ink);color:var(--paper);padding:.9em 1.6em;font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;transition:transform .5s cubic-bezier(.2,.9,.25,1);max-width:90vw;text-align:center}
@@ -176,21 +179,19 @@ body.ready .h1 .ch{transform:none}
   .nav{display:none}
   .burger{display:flex}
   .topbar{padding:18px 20px}
-  .topbar.scrolled{padding:12px 20px}
-  .hero{padding:0 20px 5vh}
+  #heroLayer{padding:0 20px 5vh}
   .hero-bottom{flex-direction:column;align-items:flex-start;gap:2.4rem}
   .hero-right{align-items:flex-start}
-  .collection{padding:8vh 20px 5vh}
+  #colLayer{padding:8vh 20px 5vh}
   .veil{padding:2rem 1.2rem}
 }
 @media (max-width:640px){.card{flex-basis:100%}}
 @media (hover:none){
-  .card-buy{transform:none;position:static;border-top:none;border:1px solid var(--line);border-top-width:0}
+  .card-buy{transform:none;position:static;border:1px solid var(--line);border-top-width:0}
   .card-img .back{display:none}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important}
-  html{scroll-behavior:auto}
 }
 </style>
 </head>
@@ -199,27 +200,26 @@ body.ready .h1 .ch{transform:none}
 <div id="stage" aria-hidden="true"></div>
 <div class="grain" aria-hidden="true"></div>
 
-<!-- верхняя панель: лого слева, меню столбиком справа -->
 <header class="topbar" id="topbar">
-  <a class="logo" href="#sec1" aria-label="DALOGO — на главную">
+  <a class="logo" href="#" data-go="0" aria-label="DALOGO — на главную">
     <img src="DALOGO.svg" alt="DALOGO" onerror="this.outerHTML='&lt;span class=&quot;logo-txt&quot;&gt;DALOGO&lt;sup&gt;&amp;reg;&lt;/sup&gt;&lt;/span&gt;'">
   </a>
   <nav class="nav" aria-label="Основное меню">
-    <a class="nl" href="#sec2"><sup>01</sup><span>Манифест</span></a>
-    <a class="nl" href="#sec3"><sup>02</sup><span>Лукбук</span></a>
-    <a class="nl" href="#sec4"><sup>03</sup><span>Ателье</span></a>
-    <a class="nl" href="#collection"><sup>04</sup><span>Коллекция №1</span></a>
-    <a class="nl" href="#collection"><sup>05</sup><span>Корзина&thinsp;·&thinsp;<b class="cartN">0</b></span></a>
+    <a class="nl" href="#" data-go="1"><sup>01</sup><span>Манифест</span></a>
+    <a class="nl" href="#" data-go="2"><sup>02</sup><span>Лукбук</span></a>
+    <a class="nl" href="#" data-go="3"><sup>03</sup><span>Ателье</span></a>
+    <a class="nl" href="#" data-go="4"><sup>04</sup><span>Коллекция №1</span></a>
+    <a class="nl" href="#" data-go="4"><sup>05</sup><span>Корзина&thinsp;·&thinsp;<b class="cartN">0</b></span></a>
   </nav>
   <button class="burger" id="burger" aria-label="Меню" aria-expanded="false"><i></i><i></i><i></i></button>
 </header>
 
 <nav class="mmenu" id="mmenu" aria-label="Мобильное меню">
-  <a href="#sec2"><sup>01</sup>Манифест</a>
-  <a href="#sec3"><sup>02</sup>Лукбук</a>
-  <a href="#sec4"><sup>03</sup>Ателье</a>
-  <a href="#collection"><sup>04</sup>Коллекция №1</a>
-  <a href="#collection"><sup>05</sup>Корзина · <b class="cartN">0</b></a>
+  <a href="#" data-go="1"><sup>01</sup>Манифест</a>
+  <a href="#" data-go="2"><sup>02</sup>Лукбук</a>
+  <a href="#" data-go="3"><sup>03</sup>Ателье</a>
+  <a href="#" data-go="4"><sup>04</sup>Коллекция №1</a>
+  <a href="#" data-go="4"><sup>05</sup>Корзина · <b class="cartN">0</b></a>
 </nav>
 
 <div class="rail" aria-hidden="true">
@@ -230,7 +230,7 @@ body.ready .h1 .ch{transform:none}
 
 <main>
   <!-- ЭКРАН 1 -->
-  <section class="scr hero" id="sec1">
+  <section class="layer" id="heroLayer" aria-label="Главная">
     <div class="hero-side">осень — зима ’25 · dalogo® · партия 001</div>
     <div class="hero-bottom">
       <div>
@@ -242,39 +242,19 @@ body.ready .h1 .ch{transform:none}
       </div>
       <div class="hero-right rv" style="--d:.45s">
         <span class="hero-cap">показ коллекции №1</span>
-        <a class="btn" href="#collection">смотреть <i>→</i></a>
+        <a class="btn" href="#" data-go="4">смотреть <i>→</i></a>
       </div>
     </div>
-    <div class="cue" aria-hidden="true"><i></i><span>скролл</span></div>
+    <div class="cue" aria-hidden="true"><i></i><span>крутите</span></div>
   </section>
 
-  <!-- ЭКРАН 2 → Camera2 -->
-  <section class="scr stmt" id="sec2" data-cam="2">
-    <div class="veil rv">
-      <p class="kicker"><b>02</b><span class="ast">✳</span>материал</p>
-      <p class="txt">Форма первична. Мы начали с ткани: плотный хлопок и шерсть, вываренные до мягкого грифа. Никакого декора ради декора — только линия, объём и шов.</p>
-    </div>
-  </section>
-
-  <!-- ЭКРАН 3 → Camera3 (DOF) -->
-  <section class="scr stmt" id="sec3" data-cam="3">
-    <div class="veil rv">
-      <p class="kicker"><b>03</b><span class="ast">✳</span>движение</p>
-      <p class="txt">Вещь должна жить. Каждый силуэт проверен в движении: посадка, шаг, наклон. Всё, что мешает, — отсекается ещё на макете.</p>
-    </div>
-  </section>
-
-  <!-- ЭКРАН 4 → Camera4 (DOF) -->
-  <section class="scr stmt" id="sec4" data-cam="4">
-    <div class="veil rv">
-      <p class="kicker"><b>04</b><span class="ast">✳</span>тираж</p>
-      <p class="txt">Двенадцать предметов, ограниченный тираж, каждый экземпляр пронумерован. Переиздания — только по запросу.</p>
-      <a class="btn" href="#collection">смотреть коллекцию <i>→</i></a>
-    </div>
+  <!-- ЭКРАНЫ 2–4: абзац фиксирован по центру, смена через fade -->
+  <section class="layer" id="stmtLayer" aria-live="polite">
+    <div class="veil"><div id="stmtInner"></div></div>
   </section>
 
   <!-- ЭКРАН 5 — слайдер -->
-  <section class="scr collection" id="collection" data-cam="4">
+  <section class="layer" id="colLayer" aria-label="Коллекция">
     <div class="col-head rv">
       <h2 class="col-title">Коллекция №1<small>осень — зима ’25 · 12 предметов · показаны 8</small></h2>
       <div class="col-nav">
@@ -316,7 +296,7 @@ const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const lerp=(a,b,t)=>a+(b-a)*t, clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 
 /* =========================================================
-   1. Типографика героя: разбивка на буквы
+   1. Типографика героя
 ========================================================= */
 $$('#heroTitle .line').forEach(line=>{
   const txt=line.textContent; line.textContent='';
@@ -328,31 +308,20 @@ $$('#heroTitle .line').forEach(line=>{
   });
 });
 requestAnimationFrame(()=>document.body.classList.add('ready'));
+setTimeout(()=>$$('.hero-meta,.hero-right').forEach(el=>el.classList.add('in')),400);
 
 /* =========================================================
-   2. Меню / шапка / появления
+   2. Меню
 ========================================================= */
-const topbar=$('#topbar');
-addEventListener('scroll',()=>topbar.classList.toggle('scrolled',scrollY>40),{passive:true});
-
 const burger=$('#burger');
 burger.addEventListener('click',()=>{
   const open=document.body.classList.toggle('menu-open');
   burger.setAttribute('aria-expanded',open);
 });
-$$('.mmenu a').forEach(a=>a.addEventListener('click',()=>{
-  document.body.classList.remove('menu-open');
-  burger.setAttribute('aria-expanded','false');
-}));
-
-const revealIO=new IntersectionObserver(es=>es.forEach(e=>{
-  if(e.isIntersecting){e.target.classList.add('in');revealIO.unobserve(e.target);}
-}),{threshold:.35});
-$$('.rv').forEach(el=>revealIO.observe(el));
+const closeMenu=()=>{document.body.classList.remove('menu-open');burger.setAttribute('aria-expanded','false');};
 
 /* =========================================================
-   3. Товары: данные + генерация изображений на canvas
-   (замените artFront/artBack на реальные фото, когда будут)
+   3. Товары: изображения на canvas
 ========================================================= */
 const PRODUCTS=[
   {name:'Худи D01',   type:'hoodie', price:'24 500 ₽', desc:'футер 480 г/м²',   dim:'68 CM'},
@@ -381,21 +350,21 @@ function dimArrow(c,x1,y,x2,label){
 const BODY=[[206,322],[198,700],[238,726],[482,726],[522,700],[514,322]];
 const SLV =[[206,322],[148,432],[200,470],[238,362]];
 const SLEEVES=[SLV,SLV.map(([x,y])=>[720-x,y])];
-const LSLEEVE=(long=false)=>[[206,322],[long?148:150,long?640:432],[long?206:200,long?662:470],[238,362]];
-const LSLEEVES=long=>[LSLEEVE(long),LSLEEVE(long).map(([x,y])=>[720-x,y])];
-const PANTS=[[268,238],[452,238],[462,720],[398,720],[362,432],[322,720],[258,720]];
+const LSLEEVE=()=>[[206,322],[150,640],[206,662],[238,362]];
+const LSLEEVES=[LSLEEVE(),LSLEEVE().map(([x,y])=>[720-x,y])];
 function drawGarment(c,type,back){
   c.lineWidth=6;c.strokeStyle=INKC;c.fillStyle=INKC;
   const fill=p=>{pathSmooth(c,p);c.fill();c.stroke();};
-  const sleeves=type==='long'?LSLEEVES(true):SLEEVES;
-  if(type==='tee'||type==='long'){ fill(BODY); sleeves.forEach(fill);
+  if(type==='tee'||type==='long'){
+    fill(BODY);(type==='long'?LSLEEVES:SLEEVES).forEach(fill);
     pathSmooth(c,[[300,230],[360,262],[420,230],[402,212],[360,234],[318,212]]);c.fill();c.stroke();
     c.lineWidth=3;
     if(type==='long'){c.beginPath();c.moveTo(176,640);c.lineTo(214,652);c.moveTo(544,640);c.lineTo(506,652);c.stroke();}
     if(!back){c.beginPath();c.moveTo(214,690);c.lineTo(506,690);c.stroke();
       c.font='800 24px Inter,Arial';c.textAlign='center';c.fillText('D',360,520);}
   }
-  else if(type==='hoodie'){ fill(BODY); sleeves.forEach(fill);
+  else if(type==='hoodie'){
+    fill(BODY);SLEEVES.forEach(fill);
     pathSmooth(c,[[286,232],[360,148],[434,232],[360,288]]);c.fill();c.stroke();
     pathSmooth(c,[[314,228],[360,266],[406,228]]);c.lineWidth=4;c.stroke();c.lineWidth=6;
     c.lineWidth=3;
@@ -404,8 +373,8 @@ function drawGarment(c,type,back){
       c.beginPath();c.moveTo(346,272);c.lineTo(338,332);c.moveTo(374,272);c.lineTo(382,332);c.stroke();}
     c.beginPath();c.moveTo(238,706);c.lineTo(482,706);c.stroke();c.lineWidth=6;
   }
-  else if(type==='vest'){ fill(BODY);
-    c.lineWidth=5;
+  else if(type==='vest'){
+    fill(BODY);c.lineWidth=5;
     pathSmooth(c,[[238,326],[262,368],[238,404]]);c.stroke();
     pathSmooth(c,[[482,326],[458,368],[482,404]]);c.stroke();
     pathSmooth(c,[[314,228],[360,262],[406,228]]);c.stroke();
@@ -413,7 +382,8 @@ function drawGarment(c,type,back){
       poly(c,[[252,432],[308,432],[308,496],[252,496]]);c.stroke();}
     c.lineWidth=3;c.beginPath();c.moveTo(238,700);c.lineTo(482,700);c.stroke();c.lineWidth=6;
   }
-  else if(type==='jacket'){ fill(BODY); sleeves.forEach(fill);
+  else if(type==='jacket'){
+    fill(BODY);SLEEVES.forEach(fill);
     poly(c,[[312,224],[360,270],[336,234]]);c.fill();c.stroke();
     poly(c,[[408,224],[360,270],[384,234]]);c.fill();c.stroke();
     c.lineWidth=4;c.beginPath();c.moveTo(352,270);c.lineTo(348,724);c.moveTo(368,270);c.lineTo(372,724);c.stroke();
@@ -424,7 +394,8 @@ function drawGarment(c,type,back){
     c.lineWidth=6;
   }
   else if(type==='pants'||type==='shorts'){
-    const P=type==='shorts'?[[268,238],[452,238],[462,520],[398,520],[362,410],[322,520],[258,520]]:PANTS;
+    const P=type==='shorts'?[[268,238],[452,238],[462,520],[398,520],[362,410],[322,520],[258,520]]
+                          :[[268,238],[452,238],[462,720],[398,720],[362,432],[322,720],[258,720]];
     fill(P);
     c.lineWidth=4;c.beginPath();c.moveTo(268,266);c.lineTo(452,266);c.stroke();
     c.lineWidth=3;
@@ -451,10 +422,8 @@ function art(type,back,artNo){
   c.beginPath();c.moveTo(W/2,40);c.lineTo(W/2,H-110);c.stroke();c.setLineDash([]);
   c.strokeStyle='rgba(20,20,20,.35)';
   cross(c,70,80);cross(c,W-70,80);cross(c,70,H-150);cross(c,W-70,H-150);
-  c.globalAlpha=back?0.08:0.045;
-  drawGarment(c,type,back);
-  c.globalAlpha=1;
-  drawGarment(c,type,back);
+  c.globalAlpha=back?0.08:0.045;drawGarment(c,type,back);
+  c.globalAlpha=1;drawGarment(c,type,back);
   c.strokeStyle='rgba(20,20,20,.5)';c.lineWidth=2;
   dimArrow(c,210,830,510,PRODUCTS.find(p=>p.type===type).dim);
   c.fillStyle=INKC;c.textAlign='left';
@@ -489,20 +458,20 @@ PRODUCTS.forEach((p,i)=>{
     </div>`;
   track.appendChild(el);
 });
-const prevB=$('#prev'),nextB=$('#next'),countEl=$('#count');
-let idx=0,perView=4;
+const prevB=$('#prev'),nextB=$('#next'),countEl=$('#count'),colLayer=$('#colLayer');
+let idxS=0,perView=4;
 const pad=n=>String(n).padStart(2,'0');
 function calcPer(){perView=innerWidth>1150?4:innerWidth>760?2:1;}
 function sliderGo(){
-  const max=PRODUCTS.length-perView;idx=clamp(idx,0,max);
+  const max=PRODUCTS.length-perView;idxS=clamp(idxS,0,max);
   const w=track.getBoundingClientRect().width,gap=24;
   const step=(w-(perView-1)*gap)/perView+gap;
-  track.style.transform=`translateX(${-idx*step}px)`;
-  countEl.textContent=`${pad(idx+1)}–${pad(idx+perView)} / ${pad(PRODUCTS.length)}`;
-  prevB.disabled=idx===0;nextB.disabled=idx>=max;
+  track.style.transform=`translateX(${-idxS*step}px)`;
+  countEl.textContent=`${pad(idxS+1)}–${pad(idxS+perView)} / ${pad(PRODUCTS.length)}`;
+  prevB.disabled=idxS===0;nextB.disabled=idxS>=max;
 }
-prevB.addEventListener('click',()=>{idx--;sliderGo();});
-nextB.addEventListener('click',()=>{idx++;sliderGo();});
+prevB.addEventListener('click',()=>{idxS--;sliderGo();});
+nextB.addEventListener('click',()=>{idxS++;sliderGo();});
 addEventListener('resize',()=>{calcPer();sliderGo();});
 calcPer();sliderGo();
 
@@ -528,7 +497,106 @@ track.addEventListener('click',e=>{
 });
 
 /* =========================================================
-   5. 3D-сцена: GLB + камеры + DOF
+   5. Поэкранная навигация: один жест = один экран
+========================================================= */
+const STEPS=[
+  {n:'02',k:'материал',t:'Форма первична. Мы начали с ткани: плотный хлопок и шерсть, вываренные до мягкого грифа. Никакого декора ради декора — только линия, объём и шов.'},
+  {n:'03',k:'движение',t:'Вещь должна жить. Каждый силуэт проверен в движении: посадка, шаг, наклон. Всё, что мешает, — отсекается ещё на макете.'},
+  {n:'04',k:'тираж',t:'Двенадцать предметов, ограниченный тираж, каждый экземпляр пронумерован. Переиздания — только по запросу.',cta:'смотреть коллекцию'},
+];
+const heroLayer=$('#heroLayer'),stmtLayer=$('#stmtLayer'),stmtInner=$('#stmtInner');
+const railIdx=$('#railIdx'),railFill=$('#railFill');
+let idx=0,locked=false,curStep=-1,stmtWasOn=false,colSeen=false;
+let setCam=()=>{}; /* подключается из 3D-модуля */
+
+function renderStep(s){
+  const d=STEPS[s];
+  stmtInner.innerHTML=
+    `<p class="kicker"><b>${d.n}</b><span class="ast">✳</span>${d.k}</p>`+
+    `<p class="txt">${d.t}</p>`+
+    (d.cta?`<button class="btn" data-go="4">${d.cta} <i>→</i></button>`:'');
+}
+function applyView(){
+  heroLayer.classList.toggle('off',idx!==0);
+  const on=idx>=1&&idx<=3;
+  stmtLayer.classList.toggle('on',on);
+  if(on){
+    const s=idx-1;
+    if(s!==curStep){
+      if(curStep===-1||!stmtWasOn){renderStep(s);curStep=s;}
+      else{
+        stmtInner.classList.add('fade');            /* исчезновение */
+        setTimeout(()=>{
+          renderStep(s);curStep=s;
+          stmtInner.classList.remove('fade');        /* появление */
+        },reduced?0:340);
+      }
+    }
+  }
+  stmtWasOn=on;
+  colLayer.classList.toggle('on',idx===4);
+  if(idx===4&&!colSeen){colSeen=true;colLayer.classList.add('in');sliderGo();}
+  setCam(Math.min(idx,3));                           /* Camera1..Camera4 */
+  railIdx.textContent='0'+(idx+1);
+  railFill.style.height=(idx/4*100)+'%';
+}
+function go(n){
+  n=clamp(n,0,4);
+  if(n===idx||locked)return;
+  locked=true;setTimeout(()=>locked=false,reduced?120:1050);
+  idx=n;applyView();closeMenu();
+}
+
+/* колесо: порог + блокировка → один «крут» = один экран */
+let acc=0,lastWheel=0;
+addEventListener('wheel',e=>{
+  if(document.body.classList.contains('menu-open')){e.preventDefault();return;}
+  if(idx===4){ /* внутри коллекции даём ей скроллиться самой, если не влезает */
+    const canDown=colLayer.scrollTop+colLayer.clientHeight<colLayer.scrollHeight-2;
+    const canUp=colLayer.scrollTop>2;
+    if(e.deltaY>0&&canDown)return;
+    if(e.deltaY<0&&canUp)return;
+  }
+  e.preventDefault();
+  if(locked){acc=0;return;}
+  const now=performance.now();
+  if(now-lastWheel>260)acc=0;
+  lastWheel=now;
+  acc+=e.deltaY;
+  if(Math.abs(acc)>70){const dir=acc>0?1:-1;acc=0;go(idx+dir);}
+},{passive:false});
+
+/* свайпы */
+let tY=null,tX=null;
+addEventListener('touchstart',e=>{tY=e.touches[0].clientY;tX=e.touches[0].clientX;},{passive:true});
+addEventListener('touchend',e=>{
+  if(tY===null)return;
+  const dy=tY-e.changedTouches[0].clientY, dx=tX-e.changedTouches[0].clientX;
+  tY=null;
+  if(Math.abs(dy)>60&&Math.abs(dy)>Math.abs(dx)){
+    if(idx===4&&e.target.closest('#colLayer')&&colLayer.scrollHeight>colLayer.clientHeight+8)return;
+    go(idx+(dy>0?1:-1));
+  }
+},{passive:true});
+
+/* клавиатура */
+addEventListener('keydown',e=>{
+  if(['ArrowDown','PageDown',' '].includes(e.key)){e.preventDefault();go(idx+1);}
+  else if(['ArrowUp','PageUp'].includes(e.key)){e.preventDefault();go(idx-1);}
+  else if(e.key==='Home')go(0);
+  else if(e.key==='End')go(4);
+});
+
+/* ссылки data-go */
+document.addEventListener('click',e=>{
+  const g=e.target.closest('[data-go]');
+  if(g){e.preventDefault();go(+g.dataset.go);}
+});
+
+applyView();
+
+/* =========================================================
+   6. 3D-сцена: GLB + камеры + DOF
 ========================================================= */
 async function init3D(){
   const THREE=await import('three');
@@ -559,10 +627,8 @@ async function init3D(){
 
   let center=new THREE.Vector3(),radius=6,fb=null;
   const cams=[];
-  const DOF=['camera3','camera4'];          // у этих камер глубина резкости
-  const dofSet=new Set(DOF);
+  const dofSet=new Set(['camera3','camera4']);
 
-  /* запасная сцена — пока нет dagolf_scene.glb */
   function buildFallback(){
     const g=new THREE.Group();
     const knot=new THREE.Mesh(
@@ -597,7 +663,6 @@ async function init3D(){
   }
   function fitFog(){scene.fog.near=radius*1.7;scene.fog.far=radius*7;}
 
-  /* загрузка модели */
   $('#ldStatus').textContent='загрузка сцены…';
   const glb=await new Promise(res=>{
     new GLTFLoader().load('dagolf_scene.glb',res,undefined,()=>res(null));
@@ -627,11 +692,11 @@ async function init3D(){
   fitFog();
   if(cams.length<4)console.warn('Найдено камер:',cams.length,'— недостающие дополнены дефолтными');
 
-  /* состояние камеры + переходы */
+  /* состояние камеры + плавные переходы */
   const state={pos:new THREE.Vector3(),quat:new THREE.Quaternion(),fov:42};
   const tgt  ={pos:new THREE.Vector3(),quat:new THREE.Quaternion(),fov:42,dof:0,focus:8};
-  let dofAmt=0,focus=8,active=-1;
-  function setCam(i){
+  let dofAmt=0,focus=8;
+  setCam=i=>{
     const c=cams[clamp(i,0,cams.length-1)];
     c.updateMatrixWorld();
     tgt.pos.setFromMatrixPosition(c.matrixWorld);
@@ -639,27 +704,9 @@ async function init3D(){
     tgt.fov=c.fov||42;
     tgt.focus=tgt.pos.distanceTo(center);
     tgt.dof=dofSet.has((c.name||'').toLowerCase())?1:0;
-  }
-  state.pos.copy(cams[0]?new THREE.Vector3().setFromMatrixPosition(cams[0].matrixWorld):new THREE.Vector3(0,0,8));
-  state.quat.copy(cams[0]?cams[0].quaternion:new THREE.Quaternion());
-  setCam(0);state.pos.copy(tgt.pos);state.quat.copy(tgt.quat);state.fov=tgt.fov;
-
-  /* управление от скролла */
-  const sections=['sec1','sec2','sec3','sec4','collection'].map(id=>document.getElementById(id));
-  const railIdx=$('#railIdx'),railFill=$('#railFill');
-  let curSec=0,velS=0;
-  function updateSection(){
-    const y=innerHeight*.5;let idx=0;
-    sections.forEach((s,i)=>{if(s.getBoundingClientRect().top<=y)idx=i;});
-    if(idx!==curSec){
-      curSec=idx;
-      railIdx.textContent='0'+(idx+1);
-      if(idx<=3)setCam(idx);          // Camera1..Camera4
-      if(idx===4)$('#collection').classList.add('in');
-    }
-  }
-  addEventListener('scroll',updateSection,{passive:true});
-  updateSection();
+  };
+  setCam(0);
+  state.pos.copy(tgt.pos);state.quat.copy(tgt.quat);state.fov=tgt.fov;
 
   const mouse={x:0,y:0,tx:0,ty:0};
   if(!reduced)addEventListener('pointermove',e=>{
@@ -668,11 +715,10 @@ async function init3D(){
   },{passive:true});
 
   /* цикл */
-  let lastY=scrollY,prevT=performance.now();
+  let lastNav=performance.now(),prevT=performance.now();
   renderer.setAnimationLoop(t=>{
     const dt=Math.min(.05,(t-prevT)/1000);prevT=t;
-    const vel=(scrollY-lastY)/Math.max(dt,.001);lastY=scrollY;
-    velS=lerp(velS,vel,1-Math.exp(-dt*6));
+    const navV=clamp((t-lastNav)/1,-1,1);lastNav=t;
 
     const k=reduced?1:1-Math.exp(-dt*2.3);
     state.pos.lerp(tgt.pos,k);
@@ -687,10 +733,12 @@ async function init3D(){
     cam.quaternion.copy(state.quat);
     cam.fov=state.fov;cam.updateProjectionMatrix();
     if(!reduced){
-      const par=radius*.05;
-      cam.translateX(mouse.x*par);cam.translateY(-mouse.y*par*.6);
-      cam.rotateY(mouse.x*.02);
-      cam.rotateX(-mouse.y*.012+clamp(velS/2500,-1,1)*.028);
+      /* ослабленный параллакс */
+      const par=radius*.02;
+      cam.translateX(mouse.x*par);
+      cam.translateY(-mouse.y*par*.5);
+      cam.rotateY(mouse.x*.008);
+      cam.rotateX(-mouse.y*.005);
     }
     bokeh.enabled=dofAmt>.004;
     bokeh.uniforms.focus.value=focus;
@@ -703,6 +751,7 @@ async function init3D(){
     }
     composer.render();
   });
+  setCam(Math.min(idx,3)); /* на случай, если навигация сработала до загрузки */
 
   addEventListener('resize',()=>{
     cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();
@@ -720,7 +769,7 @@ init3D().catch(e=>{
 /* прелоадер */
 const hideLoader=()=>$('#loader').classList.add('done');
 addEventListener('load',()=>setTimeout(hideLoader,600));
-setTimeout(hideLoader,4500); /* страховка */
+setTimeout(hideLoader,4500);
 </script>
 </body>
 </html>

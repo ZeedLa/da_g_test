@@ -8,361 +8,58 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        html, body {
-            overflow: hidden;
-            height: 100%;
-            width: 100%;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #000;
-            color: #fff;
-        }
-
-        #canvas-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-
-        .content {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 2;
-            pointer-events: none;
-        }
-
-        .screen {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            padding: 80px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.8s ease, transform 0.8s ease;
-            pointer-events: none;
-        }
-
-        .screen.active {
-            opacity: 1;
-            transform: translateY(0);
-            pointer-events: auto;
-        }
-
-        /* Header */
-        .header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            padding: 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            z-index: 100;
-            pointer-events: none;
-        }
-
-        .logo {
-            pointer-events: auto;
-        }
-
-        .logo img {
-            width: 120px;
-            height: auto;
-            display: block;
-        }
-
-        .nav {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            text-align: right;
-            pointer-events: auto;
-        }
-
-        .nav a {
-            color: #fff;
-            text-decoration: none;
-            font-size: 14px;
-            font-weight: 400;
-            letter-spacing: 0.5px;
-            transition: opacity 0.3s;
-        }
-
-        .nav a:hover {
-            opacity: 0.6;
-        }
-
-        /* Screen 1 */
-        .screen-1 {
-            align-items: flex-end;
-            justify-content: space-between;
-            padding-bottom: 80px;
-        }
-
-        .title-main {
-            font-size: clamp(48px, 8vw, 120px);
-            font-weight: 300;
-            line-height: 1;
-            letter-spacing: -2px;
-        }
-
-        .btn-outline {
-            padding: 16px 48px;
-            border: 1px solid #fff;
-            background: transparent;
-            color: #fff;
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
-            font-weight: 400;
-            letter-spacing: 1px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-transform: uppercase;
-        }
-
-        .btn-outline:hover {
-            background: #fff;
-            color: #000;
-        }
-
-        /* Screens 2-4 */
-        .screen-2, .screen-3, .screen-4 {
-            flex-direction: column;
-            text-align: center;
-        }
-
-        .text-content {
-            max-width: 600px;
-            font-size: 18px;
-            line-height: 1.8;
-            font-weight: 300;
-            margin-bottom: 40px;
-        }
-
-        /* Screen 5 - slider */
-        .screen-5 {
-            flex-direction: column;
-            padding: 120px 40px 40px;
-            justify-content: center;
-        }
-
-        .slider-container {
-            width: 100%;
-            max-width: 1400px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .slider {
-            display: flex;
-            gap: 24px;
-            transition: transform 0.5s ease;
-        }
-
-        .product-card {
-            min-width: calc(25% - 18px);
-            position: relative;
-            cursor: pointer;
-        }
-
-        .product-image {
-            width: 100%;
-            aspect-ratio: 3/4;
-            background: #1a1a1a;
-            position: relative;
-            overflow: hidden;
-            margin-bottom: 16px;
-        }
-
-        .product-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: opacity 0.3s;
-        }
-
-        .product-image .alt-image {
-            position: absolute;
-            top: 0;
-            left: 0;
-            opacity: 0;
-        }
-
-        .product-card:hover .main-image {
-            opacity: 0;
-        }
-
-        .product-card:hover .alt-image {
-            opacity: 1;
-        }
-
-        .product-info {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(0, 0, 0, 0.9);
-            padding: 20px;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.3s;
-        }
-
-        .product-card:hover .product-info {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .product-name {
-            font-size: 16px;
-            font-weight: 500;
-            margin-bottom: 12px;
-        }
-
-        .product-sizes {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .size-btn {
-            padding: 8px 16px;
-            border: 1px solid #fff;
-            background: transparent;
-            color: #fff;
-            font-size: 12px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .size-btn:hover, .size-btn.active {
-            background: #fff;
-            color: #000;
-        }
-
-        .add-to-cart {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #fff;
-            background: transparent;
-            color: #fff;
-            font-family: 'Inter', sans-serif;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .add-to-cart:hover {
-            background: #fff;
-            color: #000;
-        }
-
-        .slider-nav {
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-            margin-top: 40px;
-        }
-
-        .slider-btn {
-            width: 48px;
-            height: 48px;
-            border: 1px solid #fff;
-            background: transparent;
-            color: #fff;
-            cursor: pointer;
-            font-size: 20px;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .slider-btn:hover {
-            background: #fff;
-            color: #000;
-        }
-
-        /* Scroll indicator */
-        .scroll-indicator {
-            position: fixed;
-            right: 40px;
-            top: 50%;
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            z-index: 50;
-        }
-
-        .scroll-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-
-        .scroll-dot.active {
-            background: #fff;
-            transform: scale(1.4);
-        }
-
-        @media (max-width: 1024px) {
-            .product-card {
-                min-width: calc(50% - 12px);
-            }
-        }
-
-        @media (max-width: 640px) {
-            .product-card {
-                min-width: 100%;
-            }
-            
-            .screen {
-                padding: 40px 20px;
-            }
-            
-            .header {
-                padding: 20px;
-            }
-
-            .scroll-indicator {
-                right: 20px;
-            }
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { overflow: hidden; height: 100%; width: 100%; }
+        body { font-family: 'Inter', sans-serif; background: #000; color: #fff; }
+        #canvas-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        .content { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding: 80px; display: flex; align-items: center; justify-content: center; opacity: 0; transform: translateY(30px); transition: opacity 0.8s ease, transform 0.8s ease; pointer-events: none; }
+        .screen.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .header { position: fixed; top: 0; left: 0; width: 100%; padding: 40px; display: flex; justify-content: space-between; align-items: flex-start; z-index: 100; pointer-events: none; }
+        .logo { pointer-events: auto; }
+        .logo img { width: 120px; height: auto; display: block; }
+        .nav { display: flex; flex-direction: column; gap: 12px; text-align: right; pointer-events: auto; }
+        .nav a { color: #fff; text-decoration: none; font-size: 14px; font-weight: 400; letter-spacing: 0.5px; transition: opacity 0.3s; }
+        .nav a:hover { opacity: 0.6; }
+        .screen-1 { align-items: flex-end; justify-content: space-between; padding-bottom: 80px; }
+        .title-main { font-size: clamp(48px, 8vw, 120px); font-weight: 300; line-height: 1; letter-spacing: -2px; }
+        .btn-outline { padding: 16px 48px; border: 1px solid #fff; background: transparent; color: #fff; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 400; letter-spacing: 1px; cursor: pointer; transition: all 0.3s; text-transform: uppercase; }
+        .btn-outline:hover { background: #fff; color: #000; }
+        .screen-2, .screen-3, .screen-4 { flex-direction: column; text-align: center; }
+        .text-content { max-width: 600px; font-size: 18px; line-height: 1.8; font-weight: 300; margin-bottom: 40px; }
+        .screen-5 { flex-direction: column; padding: 120px 40px 40px; justify-content: center; }
+        .slider-container { width: 100%; max-width: 1400px; overflow: hidden; position: relative; }
+        .slider { display: flex; gap: 24px; transition: transform 0.5s ease; }
+        .product-card { min-width: calc(25% - 18px); position: relative; cursor: pointer; }
+        .product-image { width: 100%; aspect-ratio: 3/4; background: #1a1a1a; position: relative; overflow: hidden; margin-bottom: 16px; }
+        .product-image img { width: 100%; height: 100%; object-fit: cover; transition: opacity 0.3s; }
+        .product-image .alt-image { position: absolute; top: 0; left: 0; opacity: 0; }
+        .product-card:hover .main-image { opacity: 0; }
+        .product-card:hover .alt-image { opacity: 1; }
+        .product-info { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0, 0, 0, 0.9); padding: 20px; opacity: 0; transform: translateY(10px); transition: all 0.3s; }
+        .product-card:hover .product-info { opacity: 1; transform: translateY(0); }
+        .product-name { font-size: 16px; font-weight: 500; margin-bottom: 12px; }
+        .product-sizes { display: flex; gap: 12px; margin-bottom: 16px; }
+        .size-btn { padding: 8px 16px; border: 1px solid #fff; background: transparent; color: #fff; font-size: 12px; cursor: pointer; transition: all 0.3s; }
+        .size-btn:hover, .size-btn.active { background: #fff; color: #000; }
+        .add-to-cart { width: 100%; padding: 12px; border: 1px solid #fff; background: transparent; color: #fff; font-family: 'Inter', sans-serif; font-size: 13px; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.5px; }
+        .add-to-cart:hover { background: #fff; color: #000; }
+        .slider-nav { display: flex; justify-content: center; gap: 16px; margin-top: 40px; }
+        .slider-btn { width: 48px; height: 48px; border: 1px solid #fff; background: transparent; color: #fff; cursor: pointer; font-size: 20px; transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
+        .slider-btn:hover { background: #fff; color: #000; }
+        .scroll-indicator { position: fixed; right: 40px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 12px; z-index: 50; }
+        .scroll-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255, 255, 255, 0.3); transition: all 0.3s; cursor: pointer; }
+        .scroll-dot.active { background: #fff; transform: scale(1.4); }
+        .debug-panel { position: fixed; left: 20px; bottom: 20px; background: rgba(0,0,0,0.8); color: #0f0; padding: 15px; font-family: monospace; font-size: 11px; z-index: 200; max-width: 400px; max-height: 300px; overflow-y: auto; border: 1px solid #0f0; display: none; }
+        .debug-panel.visible { display: block; }
+        .debug-toggle { position: fixed; left: 20px; bottom: 20px; background: rgba(0,0,0,0.8); color: #0f0; border: 1px solid #0f0; padding: 8px 12px; font-family: monospace; font-size: 11px; cursor: pointer; z-index: 201; }
     </style>
 </head>
 <body>
     <div id="canvas-container"></div>
 
     <div class="header">
-        <div class="logo">
-            <img src="DALOGO.svg" alt="DALOGO">
-        </div>
+        <div class="logo"><img src="DALOGO.svg" alt="DALOGO"></div>
         <nav class="nav">
             <a href="#">Коллекция</a>
             <a href="#">О бренде</a>
@@ -371,6 +68,9 @@
             <a href="#">Контакты</a>
         </nav>
     </div>
+
+    <button class="debug-toggle" id="debugToggle">DEBUG</button>
+    <div class="debug-panel" id="debugPanel">Загрузка...</div>
 
     <div class="scroll-indicator">
         <div class="scroll-dot active" data-index="0"></div>
@@ -385,113 +85,25 @@
             <h1 class="title-main">первая<br>коллекция</h1>
             <button class="btn-outline" data-goto="1">смотреть</button>
         </section>
-
         <section class="screen screen-2">
-            <div class="text-content">
-                Минимализм как философия. Каждая деталь продумана, каждый шов имеет значение. Мы создаём одежду, которая говорит тишиной.
-            </div>
+            <div class="text-content">Минимализм как философия. Каждая деталь продумана, каждый шов имеет значение. Мы создаём одежду, которая говорит тишиной.</div>
         </section>
-
         <section class="screen screen-3">
-            <div class="text-content">
-                Качество без компромиссов. Натуральные ткани, ручная работа, внимание к каждому миллиметру. Это не просто одежда — это искусство.
-            </div>
+            <div class="text-content">Качество без компромиссов. Натуральные ткани, ручная работа, внимание к каждому миллиметру. Это не просто одежда — это искусство.</div>
         </section>
-
         <section class="screen screen-4">
-            <div class="text-content">
-                Лимитированная коллекция. Только 100 экземпляров каждой модели. Стань частью истории.
-            </div>
+            <div class="text-content">Лимитированная коллекция. Только 100 экземпляров каждой модели. Стань частью истории.</div>
             <button class="btn-outline" data-goto="4">купить</button>
         </section>
-
         <section class="screen screen-5">
             <div class="slider-container">
                 <div class="slider" id="slider">
-                    <div class="product-card">
-                        <div class="product-image">
-                            <img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500" alt="Product 1" class="main-image">
-                            <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=500" alt="Product 1 Alt" class="alt-image">
-                            <div class="product-info">
-                                <div class="product-name">Oversized Shirt</div>
-                                <div class="product-sizes">
-                                    <button class="size-btn" data-size="S">S</button>
-                                    <button class="size-btn" data-size="M">M</button>
-                                </div>
-                                <button class="add-to-cart">Добавить в корзину</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="product-card">
-                        <div class="product-image">
-                            <img src="https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=500" alt="Product 2" class="main-image">
-                            <img src="https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=500" alt="Product 2 Alt" class="alt-image">
-                            <div class="product-info">
-                                <div class="product-name">Minimal Jacket</div>
-                                <div class="product-sizes">
-                                    <button class="size-btn" data-size="S">S</button>
-                                    <button class="size-btn" data-size="M">M</button>
-                                </div>
-                                <button class="add-to-cart">Добавить в корзину</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="product-card">
-                        <div class="product-image">
-                            <img src="https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=500" alt="Product 3" class="main-image">
-                            <img src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=500" alt="Product 3 Alt" class="alt-image">
-                            <div class="product-info">
-                                <div class="product-name">Wide Pants</div>
-                                <div class="product-sizes">
-                                    <button class="size-btn" data-size="S">S</button>
-                                    <button class="size-btn" data-size="M">M</button>
-                                </div>
-                                <button class="add-to-cart">Добавить в корзину</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="product-card">
-                        <div class="product-image">
-                            <img src="https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500" alt="Product 4" class="main-image">
-                            <img src="https://images.unsplash.com/photo-1620799139507-2a76f79a2f4d?w=500" alt="Product 4 Alt" class="alt-image">
-                            <div class="product-info">
-                                <div class="product-name">Basic Tee</div>
-                                <div class="product-sizes">
-                                    <button class="size-btn" data-size="S">S</button>
-                                    <button class="size-btn" data-size="M">M</button>
-                                </div>
-                                <button class="add-to-cart">Добавить в корзину</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="product-card">
-                        <div class="product-image">
-                            <img src="https://images.unsplash.com/photo-1562157873-818bc0726f68?w=500" alt="Product 5" class="main-image">
-                            <img src="https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=500" alt="Product 5 Alt" class="alt-image">
-                            <div class="product-info">
-                                <div class="product-name">Knit Sweater</div>
-                                <div class="product-sizes">
-                                    <button class="size-btn" data-size="S">S</button>
-                                    <button class="size-btn" data-size="M">M</button>
-                                </div>
-                                <button class="add-to-cart">Добавить в корзину</button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="product-card">
-                        <div class="product-image">
-                            <img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500" alt="Product 6" class="main-image">
-                            <img src="https://images.unsplash.com/photo-1617137968427-85924c800a22?w=500" alt="Product 6 Alt" class="alt-image">
-                            <div class="product-info">
-                                <div class="product-name">Coat</div>
-                                <div class="product-sizes">
-                                    <button class="size-btn" data-size="S">S</button>
-                                    <button class="size-btn" data-size="M">M</button>
-                                </div>
-                                <button class="add-to-cart">Добавить в корзину</button>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="product-card"><div class="product-image"><img src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500" class="main-image"><img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=500" class="alt-image"><div class="product-info"><div class="product-name">Oversized Shirt</div><div class="product-sizes"><button class="size-btn" data-size="S">S</button><button class="size-btn" data-size="M">M</button></div><button class="add-to-cart">Добавить в корзину</button></div></div></div>
+                    <div class="product-card"><div class="product-image"><img src="https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=500" class="main-image"><img src="https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=500" class="alt-image"><div class="product-info"><div class="product-name">Minimal Jacket</div><div class="product-sizes"><button class="size-btn" data-size="S">S</button><button class="size-btn" data-size="M">M</button></div><button class="add-to-cart">Добавить в корзину</button></div></div></div>
+                    <div class="product-card"><div class="product-image"><img src="https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=500" class="main-image"><img src="https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=500" class="alt-image"><div class="product-info"><div class="product-name">Wide Pants</div><div class="product-sizes"><button class="size-btn" data-size="S">S</button><button class="size-btn" data-size="M">M</button></div><button class="add-to-cart">Добавить в корзину</button></div></div></div>
+                    <div class="product-card"><div class="product-image"><img src="https://images.unsplash.com/photo-1551028719-00167b16eac5?w=500" class="main-image"><img src="https://images.unsplash.com/photo-1620799139507-2a76f79a2f4d?w=500" class="alt-image"><div class="product-info"><div class="product-name">Basic Tee</div><div class="product-sizes"><button class="size-btn" data-size="S">S</button><button class="size-btn" data-size="M">M</button></div><button class="add-to-cart">Добавить в корзину</button></div></div></div>
+                    <div class="product-card"><div class="product-image"><img src="https://images.unsplash.com/photo-1562157873-818bc0726f68?w=500" class="main-image"><img src="https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=500" class="alt-image"><div class="product-info"><div class="product-name">Knit Sweater</div><div class="product-sizes"><button class="size-btn" data-size="S">S</button><button class="size-btn" data-size="M">M</button></div><button class="add-to-cart">Добавить в корзину</button></div></div></div>
+                    <div class="product-card"><div class="product-image"><img src="https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500" class="main-image"><img src="https://images.unsplash.com/photo-1617137968427-85924c800a22?w=500" class="alt-image"><div class="product-info"><div class="product-name">Coat</div><div class="product-sizes"><button class="size-btn" data-size="S">S</button><button class="size-btn" data-size="M">M</button></div><button class="add-to-cart">Добавить в корзину</button></div></div></div>
                 </div>
             </div>
             <div class="slider-nav">
@@ -520,23 +132,32 @@
         const container = document.getElementById('canvas-container');
         const screens = document.querySelectorAll('.screen');
         const scrollDots = document.querySelectorAll('.scroll-dot');
+        const debugPanel = document.getElementById('debugPanel');
+        const debugToggle = document.getElementById('debugToggle');
         const TOTAL_SCREENS = screens.length;
 
         let scene, camera, renderer, composer;
         let bokehPass = null;
-        let gltfScene = null;
-        let cameras = []; // массив {position, quaternion, fov, hasDoF}
+        let cameras = [];
         let currentScreen = 0;
         let targetScreen = 0;
         let isTransitioning = false;
         let transitionProgress = 0;
 
-        // Виртуальная камера для интерполяции
         let activeCam = {
             position: new THREE.Vector3(),
             quaternion: new THREE.Quaternion(),
             fov: 75
         };
+
+        function log(msg) {
+            console.log('[DALOGO]', msg);
+            debugPanel.innerHTML += '<br>' + msg;
+        }
+
+        debugToggle.addEventListener('click', () => {
+            debugPanel.classList.toggle('visible');
+        });
 
         function init() {
             scene = new THREE.Scene();
@@ -550,7 +171,6 @@
             renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
             container.appendChild(renderer.domElement);
 
-            // Postprocessing для depth of field
             composer = new EffectComposer(renderer);
             const renderPass = new RenderPass(scene, camera);
             composer.addPass(renderPass);
@@ -572,47 +192,121 @@
 
             const loader = new GLTFLoader();
             loader.load('dagolf_scene.glb', (gltf) => {
-                gltfScene = gltf.scene;
-                scene.add(gltfScene);
+                scene.add(gltf.scene);
 
-                // Собираем камеры из GLB
-                gltf.cameras.forEach((cam, index) => {
+                log('=== GLB ЗАГРУЖЕН ===');
+                log('gltf.cameras.length: ' + gltf.cameras.length);
+                log('gltf.cameras имена: ' + gltf.cameras.map(c => c.name).join(', '));
+
+                // СПОСОБ 1: через gltf.cameras (официальный массив)
+                const camerasFromGltf = [];
+                gltf.cameras.forEach((cam) => {
                     const pos = new THREE.Vector3();
                     const quat = new THREE.Quaternion();
                     cam.getWorldPosition(pos);
                     cam.getWorldQuaternion(quat);
-                    
-                    // Определяем DoF по имени камеры
-                    const name = (cam.name || '').toLowerCase();
-                    const hasDoF = name.includes('camera3') || name.includes('camera4') || 
-                                   name.includes('cam3') || name.includes('cam4');
-
-                    cameras.push({
+                    camerasFromGltf.push({
+                        name: cam.name,
                         position: pos,
                         quaternion: quat,
                         fov: cam.fov || 75,
-                        hasDoF: hasDoF
+                        source: 'gltf.cameras'
                     });
+                    log(`[gltf.cameras] "${cam.name}" pos=(${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)}) fov=${cam.fov}`);
                 });
 
-                // Если камер в GLB меньше 4 — дополним виртуальными
-                while (cameras.length < 4) {
-                    const i = cameras.length;
-                    cameras.push({
-                        position: new THREE.Vector3(
-                            Math.cos(i * Math.PI / 2) * 15,
-                            2 + i * 2,
-                            Math.sin(i * Math.PI / 2) * 15
-                        ),
-                        quaternion: new THREE.Quaternion().setFromEuler(
-                            new THREE.Euler(0, -i * Math.PI / 2, 0)
-                        ),
-                        fov: 75,
-                        hasDoF: i >= 2
-                    });
+                // СПОСОБ 2: рекурсивный обход сцены — ищем все Camera объекты
+                const camerasFromScene = [];
+                gltf.scene.traverse((obj) => {
+                    if (obj.isCamera) {
+                        const pos = new THREE.Vector3();
+                        const quat = new THREE.Quaternion();
+                        obj.getWorldPosition(pos);
+                        obj.getWorldQuaternion(quat);
+                        camerasFromScene.push({
+                            name: obj.name,
+                            position: pos,
+                            quaternion: quat,
+                            fov: obj.fov || 75,
+                            source: 'scene.traverse'
+                        });
+                        log(`[scene.traverse] "${obj.name}" type=${obj.type} pos=(${pos.x.toFixed(2)}, ${pos.y.toFixed(2)}, ${pos.z.toFixed(2)}) fov=${obj.fov}`);
+                    }
+                });
+
+                // СПОСОБ 3: ищем по именам Camera1, Camera2, Camera3, Camera4
+                const namedCameras = [];
+                for (let i = 1; i <= 4; i++) {
+                    const targetName = `Camera${i}`;
+                    const found = camerasFromScene.find(c => 
+                        c.name === targetName || 
+                        c.name === targetName.toLowerCase() ||
+                        c.name === `cam${i}` ||
+                        c.name === `cam${i}a`
+                    );
+                    if (found) {
+                        namedCameras.push(found);
+                        log(`✓ Нашёл ${targetName}: "${found.name}"`);
+                    } else {
+                        log(`✗ ${targetName} не найден`);
+                    }
                 }
 
-                // Инициализируем активную камеру на Camera1
+                // Финальный выбор: приоритет — именованные камеры, потом gltf.cameras, потом scene.traverse
+                if (namedCameras.length >= 4) {
+                    cameras = namedCameras.map(c => ({
+                        position: c.position,
+                        quaternion: c.quaternion,
+                        fov: c.fov,
+                        hasDoF: c.name.toLowerCase().includes('3') || c.name.toLowerCase().includes('4'),
+                        originalName: c.name
+                    }));
+                    log('Использую именованные камеры Camera1-4');
+                } else if (camerasFromGltf.length >= 4) {
+                    cameras = camerasFromGltf.slice(0, 4).map((c, i) => ({
+                        position: c.position,
+                        quaternion: c.quaternion,
+                        fov: c.fov,
+                        hasDoF: i >= 2,
+                        originalName: c.name
+                    }));
+                    log('Использую gltf.cameras (первые 4)');
+                } else if (camerasFromScene.length >= 4) {
+                    cameras = camerasFromScene.slice(0, 4).map((c, i) => ({
+                        position: c.position,
+                        quaternion: c.quaternion,
+                        fov: c.fov,
+                        hasDoF: i >= 2,
+                        originalName: c.name
+                    }));
+                    log('Использую scene.traverse камеры (первые 4)');
+                } else {
+                    log('⚠ Камер не хватает, дополню виртуальными');
+                    cameras = [...camerasFromScene, ...camerasFromGltf];
+                    while (cameras.length < 4) {
+                        const i = cameras.length;
+                        cameras.push({
+                            position: new THREE.Vector3(Math.cos(i * Math.PI / 2) * 15, 2 + i * 2, Math.sin(i * Math.PI / 2) * 15),
+                            quaternion: new THREE.Quaternion().setFromEuler(new THREE.Euler(0, -i * Math.PI / 2, 0)),
+                            fov: 75,
+                            hasDoF: i >= 2,
+                            originalName: `virtual_${i}`
+                        });
+                    }
+                    cameras = cameras.slice(0, 4).map((c, i) => ({
+                        position: c.position,
+                        quaternion: c.quaternion,
+                        fov: c.fov || 75,
+                        hasDoF: i >= 2,
+                        originalName: c.originalName || c.name || `cam_${i}`
+                    }));
+                }
+
+                log('=== ИТОГОВЫЙ СПИСОК КАМЕР ===');
+                cameras.forEach((c, i) => {
+                    log(`[${i}] "${c.originalName}" pos=(${c.position.x.toFixed(2)}, ${c.position.y.toFixed(2)}, ${c.position.z.toFixed(2)}) fov=${c.fov} dof=${c.hasDoF}`);
+                });
+
                 activeCam.position.copy(cameras[0].position);
                 activeCam.quaternion.copy(cameras[0].quaternion);
                 activeCam.fov = cameras[0].fov;
@@ -620,7 +314,8 @@
 
                 animate();
             }, undefined, (error) => {
-                console.error('GLB load error:', error);
+                log('ОШИБКА ЗАГРУЗКИ GLB: ' + error.message);
+                console.error(error);
                 createFallbackScene();
                 animate();
             });
@@ -632,26 +327,16 @@
 
         function createFallbackScene() {
             const geometry = new THREE.TorusKnotGeometry(3, 1, 200, 32);
-            const material = new THREE.MeshStandardMaterial({
-                color: 0x222222,
-                metalness: 0.7,
-                roughness: 0.3
-            });
-            const mesh = new THREE.Mesh(geometry, material);
-            scene.add(mesh);
+            const material = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.7, roughness: 0.3 });
+            scene.add(new THREE.Mesh(geometry, material));
 
             for (let i = 0; i < 4; i++) {
                 cameras.push({
-                    position: new THREE.Vector3(
-                        Math.cos(i * Math.PI / 2) * 10,
-                        2 + i * 1.5,
-                        Math.sin(i * Math.PI / 2) * 10
-                    ),
-                    quaternion: new THREE.Quaternion().setFromEuler(
-                        new THREE.Euler(0, -i * Math.PI / 2, 0)
-                    ),
+                    position: new THREE.Vector3(Math.cos(i * Math.PI / 2) * 10, 2 + i * 1.5, Math.sin(i * Math.PI / 2) * 10),
+                    quaternion: new THREE.Quaternion().setFromEuler(new THREE.Euler(0, -i * Math.PI / 2, 0)),
                     fov: 75,
-                    hasDoF: i >= 2
+                    hasDoF: i >= 2,
+                    originalName: `fallback_${i}`
                 });
             }
             activeCam.position.copy(cameras[0].position);
@@ -678,40 +363,30 @@
 
         function setupScroll() {
             let lastWheelTime = 0;
-            const WHEEL_COOLDOWN = 700; // мс между переключениями
+            const WHEEL_COOLDOWN = 700;
 
             window.addEventListener('wheel', (e) => {
                 e.preventDefault();
                 if (isTransitioning) return;
-
                 const now = Date.now();
                 if (now - lastWheelTime < WHEEL_COOLDOWN) return;
                 lastWheelTime = now;
-
                 const delta = Math.sign(e.deltaY);
                 const next = targetScreen + delta;
                 if (next < 0 || next >= TOTAL_SCREENS) return;
-
                 goToScreen(next);
             }, { passive: false });
 
-            // Тач-скролл
             let touchStartY = 0;
-            window.addEventListener('touchstart', (e) => {
-                touchStartY = e.touches[0].clientY;
-            });
+            window.addEventListener('touchstart', (e) => { touchStartY = e.touches[0].clientY; });
             window.addEventListener('touchend', (e) => {
-                const touchEndY = e.changedTouches[0].clientY;
-                const diff = touchStartY - touchEndY;
-                if (Math.abs(diff) < 50) return;
-                if (isTransitioning) return;
-                const delta = diff > 0 ? 1 : -1;
-                const next = targetScreen + delta;
+                const diff = touchStartY - e.changedTouches[0].clientY;
+                if (Math.abs(diff) < 50 || isTransitioning) return;
+                const next = targetScreen + (diff > 0 ? 1 : -1);
                 if (next < 0 || next >= TOTAL_SCREENS) return;
                 goToScreen(next);
             });
 
-            // Клавиатура
             window.addEventListener('keydown', (e) => {
                 if (isTransitioning) return;
                 if (e.key === 'ArrowDown' || e.key === ' ') {
@@ -727,27 +402,20 @@
         }
 
         function setupUI() {
-            // Кнопки перехода между экранами
             document.querySelectorAll('[data-goto]').forEach(btn => {
                 btn.addEventListener('click', () => {
                     const idx = parseInt(btn.dataset.goto);
-                    if (!isNaN(idx) && idx !== targetScreen && !isTransitioning) {
-                        goToScreen(idx);
-                    }
+                    if (!isNaN(idx) && idx !== targetScreen && !isTransitioning) goToScreen(idx);
                 });
             });
 
-            // Точки-индикаторы
             scrollDots.forEach(dot => {
                 dot.addEventListener('click', () => {
                     const idx = parseInt(dot.dataset.index);
-                    if (!isNaN(idx) && idx !== targetScreen && !isTransitioning) {
-                        goToScreen(idx);
-                    }
+                    if (!isNaN(idx) && idx !== targetScreen && !isTransitioning) goToScreen(idx);
                 });
             });
 
-            // Слайдер
             const slider = document.getElementById('slider');
             const prevBtn = document.getElementById('prevBtn');
             const nextBtn = document.getElementById('nextBtn');
@@ -757,28 +425,17 @@
             function updateSlider() {
                 const firstCard = slider.children[0];
                 if (!firstCard) return;
-                const slideWidth = firstCard.offsetWidth + 24;
-                slider.style.transform = `translateX(-${currentSlide * slideWidth}px)`;
+                slider.style.transform = `translateX(-${currentSlide * (firstCard.offsetWidth + 24)}px)`;
             }
 
             nextBtn.addEventListener('click', () => {
-                const maxSlide = slider.children.length - slidesToShow;
-                if (currentSlide < maxSlide) {
-                    currentSlide++;
-                    updateSlider();
-                }
+                if (currentSlide < slider.children.length - slidesToShow) { currentSlide++; updateSlider(); }
             });
-
             prevBtn.addEventListener('click', () => {
-                if (currentSlide > 0) {
-                    currentSlide--;
-                    updateSlider();
-                }
+                if (currentSlide > 0) { currentSlide--; updateSlider(); }
             });
-
             window.addEventListener('resize', updateSlider);
 
-            // Размеры
             document.querySelectorAll('.size-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -788,15 +445,13 @@
                 });
             });
 
-            // Корзина
             document.querySelectorAll('.add-to-cart').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const card = e.target.closest('.product-card');
                     const name = card.querySelector('.product-name').textContent;
                     const sizeBtn = card.querySelector('.size-btn.active');
-                    const size = sizeBtn ? sizeBtn.dataset.size : 'Не выбран';
-                    alert(`Добавлено в корзину:\n${name}\nРазмер: ${size}`);
+                    alert(`Добавлено:\n${name}\nРазмер: ${sizeBtn ? sizeBtn.dataset.size : 'Не выбран'}`);
                 });
             });
         }
@@ -804,7 +459,6 @@
         function goToScreen(index) {
             if (index < 0 || index >= TOTAL_SCREENS || index === targetScreen) return;
 
-            // Сохраняем текущее состояние как старт интерполяции
             const fromPos = activeCam.position.clone();
             const fromQuat = activeCam.quaternion.clone();
             const fromFov = activeCam.fov;
@@ -814,24 +468,20 @@
             isTransitioning = true;
             transitionProgress = 0;
 
-            // Обновляем UI
-            screens.forEach((s, i) => {
-                s.classList.toggle('active', i === targetScreen);
-            });
-            scrollDots.forEach((d, i) => {
-                d.classList.toggle('active', i === targetScreen);
-            });
+            screens.forEach((s, i) => s.classList.toggle('active', i === targetScreen));
+            scrollDots.forEach((d, i) => d.classList.toggle('active', i === targetScreen));
 
-            // Запоминаем "откуда" для анимации
             activeCam._fromPos = fromPos;
             activeCam._fromQuat = fromQuat;
             activeCam._fromFov = fromFov;
+
+            log(`→ Переход на экран ${index}, камера "${cameras[Math.min(index, cameras.length-1)].originalName}"`);
         }
 
         function updateCameraTransition(delta) {
             if (!isTransitioning) return;
 
-            transitionProgress += delta * 1.2; // скорость перехода
+            transitionProgress += delta * 1.2;
             if (transitionProgress >= 1) {
                 transitionProgress = 1;
                 isTransitioning = false;
@@ -843,7 +493,6 @@
             const fromQuat = activeCam._fromQuat || cameras[currentScreen].quaternion;
             const fromFov = activeCam._fromFov || cameras[currentScreen].fov;
 
-            // easeInOutCubic
             const t = transitionProgress;
             const ease = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
 
@@ -853,17 +502,14 @@
 
             applyActiveCam();
 
-            // Depth of Field
             const shouldDoF = target.hasDoF && transitionProgress > 0.3;
             if (bokehPass) {
                 bokehPass.enabled = shouldDoF;
                 if (shouldDoF) {
-                    // Плавное появление DoF
                     const dofT = Math.min(1, (transitionProgress - 0.3) / 0.7);
                     bokehPass.uniforms['aperture'].value = 0.0001 * dofT;
                     bokehPass.uniforms['maxblur'].value = 0.015 * dofT;
-                    const dist = fromPos.distanceTo(target.position) * 0.5 + 5;
-                    bokehPass.uniforms['focus'].value = dist;
+                    bokehPass.uniforms['focus'].value = fromPos.distanceTo(target.position) * 0.5 + 5;
                 }
             }
         }
@@ -874,14 +520,9 @@
             const now = performance.now();
             const delta = Math.min((now - lastTime) / 1000, 0.1);
             lastTime = now;
-
             updateCameraTransition(delta);
-
-            if (bokehPass && bokehPass.enabled) {
-                composer.render();
-            } else {
-                renderer.render(scene, camera);
-            }
+            if (bokehPass && bokehPass.enabled) composer.render();
+            else renderer.render(scene, camera);
         }
 
         init();

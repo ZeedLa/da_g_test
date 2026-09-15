@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DALOGO — первая коллекция</title>
+<title>DAGOLF — первая коллекция</title>
 <!--
   Файлы рядом с этим index.html:
     DALOGO.svg        — логотип (верхний левый угол)
@@ -209,7 +209,7 @@ body.ready .h1 .ch{transform:none}
 <div class="grain" aria-hidden="true"></div>
 
 <header class="topbar" id="topbar">
-  <a class="logo" href="#" data-go="0" aria-label="DALOGO — на главную">
+  <a class="logo" href="#" data-go="0" aria-label="DAGOLF — на главную">
     <img src="DALOGO.svg" alt="DALOGO" onerror="this.outerHTML='&lt;span class=&quot;logo-txt&quot;&gt;DALOGO&lt;sup&gt;&amp;reg;&lt;/sup&gt;&lt;/span&gt;'">
   </a>
   <nav class="nav" aria-label="Основное меню">
@@ -276,7 +276,7 @@ body.ready .h1 .ch{transform:none}
     </div>
     <p class="col-note rv" style="--d:.3s"><b>✳</b> наведите на вещь — вид сзади, размеры и корзина</p>
     <div class="col-foot rv" style="--d:.4s">
-      <span>© DALOGO, 2025</span><span>сделано вне сезона</span><span>telegram / instagram</span>
+      <span>© DAGOLF, 2026</span><span>сделано вне сезона</span><span>telegram</span>
     </div>
   </section>
 </main>
@@ -284,7 +284,7 @@ body.ready .h1 .ch{transform:none}
 <div id="toast" role="status" aria-live="polite"></div>
 
 <div id="loader">
-  <div class="ld-word">DALOGO<sup>®</sup></div>
+  <div class="ld-word">DAGOLF<sup>®</sup></div>
   <div class="ld-bar"><i></i></div>
   <div class="ld-status" id="ldStatus">загрузка сцены…</div>
 </div>
@@ -436,7 +436,7 @@ function art(type,back,artNo){
   dimArrow(c,210,830,510,PRODUCTS.find(p=>p.type===type).dim);
   c.fillStyle=INKC;c.textAlign='left';
   c.font='700 21px Inter,Arial';c.fillText(back?'вид 02':'вид 01',64,78);
-  c.font='500 17px Inter,Arial';c.fillText(artNo+' / dalogo®',64,H-160);
+  c.font='500 17px Inter,Arial';c.fillText(artNo+' / dagolf®',64,H-160);
   c.textAlign='right';c.fillText(back?'back':'front',W-64,H-160);
   return cv.toDataURL('image/png');
 }

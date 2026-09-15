@@ -737,8 +737,8 @@ async function init3D(){
       const par=radius*.01;
       cam.translateX(mouse.x*par);
       cam.translateY(-mouse.y*par*.5);
-      cam.rotateY(mouse.x*.008);
-      cam.rotateX(-mouse.y*.005);
+      cam.rotateY(mouse.x*.002);
+      cam.rotateX(-mouse.y*.002);
     }
     bokeh.enabled=dofAmt>.004;
     bokeh.uniforms.focus.value=focus;

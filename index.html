@@ -9,7 +9,7 @@
 DALOGO.svg        — логотип (верхний левый угол)
 dagolf_scene.glb  — 3D-сцена, внутри камеры Camera1..Camera4
 Items/            — фото коллекции: 9 изделий × 2 вида
-                    item_a1/item_a2 … item_i1/item_i2.jpg (1 = фронт, 2 = вид при наведении)
+item_a1/item_a2 … item_i1/item_i2.jpg (1 = фронт, 2 = вид при наведении)
 brandvideo.mp4    — фильм бренда (экран после коллекции)
 Шрифт: Inter. Для замены на cygre достаточно поменять --display.
 Навигация: один жест колеса / свайп / стрелки = один экран.
@@ -50,8 +50,10 @@ background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/sv
 animation:grain 9s steps(6) infinite}
 @keyframes grain{0%{transform:translate(0,0)}25%{transform:translate(-2%,3%)}50%{transform:translate(3%,-2%)}75%{transform:translate(-3%,-3%)}100%{transform:translate(2%,2%)}}
 /* ---------- верхняя панель ---------- */
-.topbar{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;align-items:flex-start;padding:26px 34px}
-.logo img{height:34px;width:auto;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.topbar{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;align-items:flex-start;padding:26px 34px;
+border-bottom:1px solid transparent;
+transition:background .45s ease,padding .45s cubic-bezier(.2,.8,.2,1),border-color .45s ease} /* ИЗМЕНЕНО: транзишн для чёрной шапки */
+.logo img{height:34px;width:auto;transition:height .45s cubic-bezier(.2,.8,.2,1),transform .5s cubic-bezier(.2,.8,.2,1),filter .45s ease}
 .logo:hover img{transform:rotate(-3deg)}
 .logo-txt{font-weight:800;letter-spacing:.06em;font-size:1.35rem}
 .logo-txt sup{font-size:.5em;color:var(--accent)}
@@ -64,8 +66,18 @@ animation:grain 9s steps(6) infinite}
 .nl:hover sup{transform:translateY(-2px)}
 .nl:hover::after{transform:scaleX(1);transform-origin:left}
 .nl b{font-weight:700}
-.burger{display:none;flex-direction:column;gap:6px;padding:8px;z-index:80}
-.burger i{display:block;width:26px;height:2px;background:var(--ink);transition:transform .4s,opacity .3s}
+/* ---------- НОВОЕ: шапка после первого экрана — узкая чёрная, меню горизонтально ---------- */
+body.scrolled .topbar{background:#111;border-bottom-color:rgba(255,255,255,.16);padding:10px 24px;align-items:center}
+body.scrolled .logo img{height:24px;filter:brightness(0) invert(1)} /* логотип становится белым */
+body.scrolled .logo-txt{color:var(--paper);font-size:1.05rem}
+body.scrolled .nav{flex-direction:row;align-items:center;gap:1.6rem}
+body.scrolled .nl{color:#fff;font-size:.72rem}
+body.scrolled .nl::after{background:#fff}
+/* ---------- бургер: вынесен из шапки (ИЗМЕНЕНО), чтобы всегда быть поверх меню ---------- */
+.burger{display:none;flex-direction:column;gap:6px;padding:8px;position:fixed;top:22px;right:26px;z-index:80}
+.burger i{display:block;width:26px;height:2px;background:var(--ink);transition:transform .4s,opacity .3s,background .3s}
+body.scrolled .burger i{background:#fff}
+body.menu-open .burger i{background:var(--ink)} /* крестик над светлой подложкой меню */
 body.menu-open .burger i:nth-child(1){transform:translateY(8px) rotate(45deg)}
 body.menu-open .burger i:nth-child(2){opacity:0}
 body.menu-open .burger i:nth-child(3){transform:translateY(-8px) rotate(-45deg)}
@@ -73,10 +85,15 @@ body.menu-open .burger i:nth-child(3){transform:translateY(-8px) rotate(-45deg)}
 body.menu-open .mmenu{clip-path:inset(0 0 0% 0)}
 .mmenu a{font-family:var(--display);font-size:clamp(2rem,8vw,3.4rem);font-weight:250;text-transform:uppercase;letter-spacing:-.02em;display:flex;gap:1rem;align-items:baseline;border-bottom:1px solid var(--line);padding:.5rem 0}
 .mmenu a sup{font-size:.8rem;font-weight:600;color:var(--accent)}
-/* ---------- рейл прогресса ---------- */
-.rail{position:fixed;left:34px;bottom:34px;z-index:45;display:flex;flex-direction:column;align-items:center;gap:12px;font-size:.62rem;font-weight:600;letter-spacing:.14em}
-.rail-line{width:1px;height:130px;background:var(--line);position:relative;overflow:hidden}
-.rail-line i{position:absolute;left:0;top:0;width:100%;height:0%;background:var(--ink);transition:height .7s cubic-bezier(.65,.05,.25,1)}
+/* ---------- НОВОЕ: футер с огромной надписью ---------- */
+.big-foot{margin-top:5rem;padding-top:1.6rem;border-top:1px solid var(--line)}
+.bf-meta{display:flex;justify-content:space-between;gap:1rem;font-size:.66rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);flex-wrap:wrap;margin-bottom:2.4rem}
+.bf-word{font-family:var(--display);font-weight:230;line-height:.78;letter-spacing:-.045em;text-transform:uppercase;white-space:nowrap;user-select:none;
+font-size:clamp(4rem,17vw,15rem);color:transparent;-webkit-text-stroke:2px var(--ink);
+transition:color .6s ease;padding-bottom:.06em}
+.bf-word sup{font-size:.18em;-webkit-text-stroke:0;color:var(--accent)}
+.bf-word:hover{color:var(--ink)}
+@supports not (-webkit-text-stroke:1px #000){.bf-word{color:var(--ink)}}
 /* ---------- слои-экраны ---------- */
 .layer{position:fixed;inset:0;z-index:1;transition:opacity .55s ease,transform .7s cubic-bezier(.65,.05,.25,1)}
 /* экран 1 */
@@ -101,13 +118,12 @@ body.ready .h1 .ch{transform:none}
 .cue i{width:1px;height:46px;background:var(--line);position:relative;overflow:hidden;display:block}
 .cue i::after{content:'';position:absolute;left:0;top:-40%;width:100%;height:40%;background:var(--ink);animation:cue 1.8s cubic-bezier(.6,0,.4,1) infinite}
 @keyframes cue{to{top:110%}}
-/* экраны 2–4: абзац зафиксирован; на экране 2 — прижат к левому краю */
+/* экраны 2–4 */
 #stmtLayer{display:flex;align-items:center;justify-content:center;text-align:center;padding:0 24px;opacity:0;transform:translateY(26px);pointer-events:none;touch-action:none}
 #stmtLayer.on{opacity:1;transform:none;pointer-events:auto}
 #stmtLayer.left{justify-content:flex-start;text-align:left;padding:0 24px 0 max(24px,7vw)}
 #stmtLayer.left .kicker{justify-content:flex-start}
 #stmtLayer.left .txt{margin:0}
-/* подложка: только мягкое размытое белое пятно, без стекла */
 .veil{max-width:620px;padding:3.2rem 3.4rem;position:relative}
 .veil::before{content:'';position:absolute;inset:-50% -40%;z-index:-1;pointer-events:none;
 background:radial-gradient(closest-side,rgba(246,245,240,.97),rgba(246,245,240,0) 72%);
@@ -120,7 +136,7 @@ filter:blur(46px);}
 @keyframes spin{to{transform:rotate(360deg)}}
 .txt{font-size:clamp(1.05rem,1.7vw,1.35rem);line-height:1.6;font-weight:430;max-width:44ch;margin:0 auto}
 #stmtInner .btn{margin-top:2.4rem}
-/* экран 5 — коллекция (выезжает снизу) */
+/* экран 5 — коллекция */
 #colLayer{background:var(--paper);border-top:1.5px solid var(--ink);transform:translateY(103%);overflow-y:auto;touch-action:pan-y;padding:9vh 34px 6vh;transition:transform .75s cubic-bezier(.65,.05,.25,1)}
 #colLayer.on{transform:none}
 .col-head{display:flex;justify-content:space-between;align-items:flex-end;gap:2rem;margin-bottom:3rem;flex-wrap:wrap}
@@ -154,8 +170,11 @@ filter:blur(46px);}
 .price{font-size:.86rem;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
 .col-note{margin-top:3rem;font-size:.66rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
 .col-note b{color:var(--accent)}
-.col-foot{margin-top:5rem;padding-top:1.6rem;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:1rem;font-size:.66rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);flex-wrap:wrap}
-/* экран 6 — видео на весь экран */
+/* появления */
+.rv{opacity:0;transform:translateY(22px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.8,.2,1);transition-delay:var(--d,0s)}
+.rv.in{opacity:1;transform:none}
+#colLayer.in .rv{opacity:1;transform:none}
+/* экран 6 — видео */
 #vidLayer{background:#0a0a09;border-top:1.5px solid var(--ink);transform:translateY(103%);transition:transform .75s cubic-bezier(.65,.05,.25,1);touch-action:pan-y}
 #vidLayer.on{transform:none}
 #brandVideo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:#0a0a09}
@@ -166,10 +185,6 @@ text-shadow:0 1px 10px rgba(0,0,0,.55)}
 .vctl{width:46px;height:46px;border:1.5px solid #fff;color:#fff;display:grid;place-items:center;
 font-size:.9rem;font-weight:600;mix-blend-mode:difference;transition:background .25s,color .25s}
 .vctl:hover{background:#fff;color:#000}
-/* появления */
-.rv{opacity:0;transform:translateY(22px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.8,.2,1);transition-delay:var(--d,0s)}
-.rv.in{opacity:1;transform:none}
-#colLayer.in .rv{opacity:1;transform:none}
 /* тост */
 #toast{position:fixed;left:50%;bottom:30px;transform:translate(-50%,180%);z-index:90;background:var(--ink);color:var(--paper);padding:.9em 1.6em;font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;transition:transform .5s cubic-bezier(.2,.9,.25,1);max-width:90vw;text-align:center}
 #toast.show{transform:translate(-50%,0)}
@@ -184,11 +199,13 @@ font-size:.9rem;font-weight:600;mix-blend-mode:difference;transition:background 
 @keyframes ld{0%{transform:translateX(-110%)}100%{transform:translateX(300%)}}
 .ld-status{font-size:.62rem;font-weight:600;letter-spacing:.26em;text-transform:uppercase;color:var(--mut)}
 @media (max-width:1150px){.card{flex-basis:calc((100% - 24px)/2)}}
-@media (max-width:1000px){.rail{display:none}.hero-side{display:none}}
+@media (max-width:1000px){.hero-side{display:none}} /* ИЗМЕНЕНО: rail удалён */
 @media (max-width:760px){
 .nav{display:none}
-.burger{display:flex}
+.burger{display:flex;top:14px;right:12px}
 .topbar{padding:18px 20px}
+body.scrolled .topbar{padding:9px 16px}
+body.scrolled .logo img{height:20px}
 #heroLayer{padding:0 20px 5vh}
 .hero-bottom{flex-direction:column;align-items:flex-start;gap:2.4rem}
 .hero-right{align-items:flex-start}
@@ -202,6 +219,7 @@ font-size:.9rem;font-weight:600;mix-blend-mode:difference;transition:background 
 @media (hover:none){
 .card-buy{transform:none;position:static;border:1px solid var(--line);border-top-width:0}
 .card-img .ph-b{display:none}
+.bf-word:hover{color:transparent}
 }
 @media (prefers-reduced-motion:reduce){
 *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important}
@@ -222,8 +240,9 @@ font-size:.9rem;font-weight:600;mix-blend-mode:difference;transition:background 
 <a class="nl" href="#" data-go="4"><sup>04</sup><span>Избранное</span></a>
 <a class="nl" href="#" data-go="4"><sup>05</sup><span>Корзина&thinsp;·&thinsp;<b class="cartN">0</b></span></a>
 </nav>
-<button class="burger" id="burger" aria-label="Меню" aria-expanded="false"><i></i><i></i><i></i></button>
 </header>
+<!-- ИЗМЕНЕНО: бургер вынесен из шапки, чтобы всегда быть кликабельным поверх меню -->
+<button class="burger" id="burger" aria-label="Меню" aria-expanded="false"><i></i><i></i><i></i></button>
 <nav class="mmenu" id="mmenu" aria-label="Мобильное меню">
 <a href="#" data-go="1"><sup>01</sup>Каталог</a>
 <a href="#" data-go="2"><sup>02</sup>О бренде</a>
@@ -231,13 +250,6 @@ font-size:.9rem;font-weight:600;mix-blend-mode:difference;transition:background 
 <a href="#" data-go="4"><sup>04</sup>Избранное</a>
 <a href="#" data-go="4"><sup>05</sup>Корзина · <b class="cartN">0</b></a>
 </nav>
-  
-<div class="rail" aria-hidden="true">
-<span id="railIdx">01</span>
-<span class="rail-line"><i id="railFill"></i></span>
-<span>06</span>
-</div>
-  
 <main>
 <!-- ЭКРАН 1 -->
 <section class="layer" id="heroLayer" aria-label="Главная">
@@ -257,7 +269,7 @@ font-size:.9rem;font-weight:600;mix-blend-mode:difference;transition:background 
 </div>
 <div class="cue" aria-hidden="true"><i></i><span>крутите</span></div>
 </section>
-<!-- ЭКРАНЫ 2–4: абзац фиксирован; на экране 2 — слева -->
+<!-- ЭКРАНЫ 2–4 -->
 <section class="layer" id="stmtLayer" aria-live="polite">
 <div class="veil"><div id="stmtInner"></div></div>
 </section>
@@ -275,9 +287,15 @@ font-size:.9rem;font-weight:600;mix-blend-mode:difference;transition:background 
 <div class="track" id="track"></div>
 </div>
 <p class="col-note rv" style="--d:.3s"><b>✳</b> наведите на вещь — вид сзади, размеры и корзина</p>
-<div class="col-foot rv" style="--d:.4s">
-<span>© DAGOLF, 2026</span><span>сделано вне сезона</span><span>telegram</span>
+<!-- НОВОЕ: футер с огромной надписью -->
+<footer class="big-foot rv" style="--d:.4s">
+<div class="bf-meta">
+<span>© DAGOLF, 2026</span>
+<span>сделано вне сезона</span>
+<span>telegram</span>
 </div>
+<div class="bf-word" aria-hidden="true">DAGOLF<sup>®</sup></div>
+</footer>
 </section>
 <!-- ЭКРАН 6 — видео -->
 <section class="layer" id="vidLayer" aria-label="Фильм коллекции">
@@ -334,8 +352,7 @@ burger.setAttribute('aria-expanded',open);
 });
 const closeMenu=()=>{document.body.classList.remove('menu-open');burger.setAttribute('aria-expanded','false');};
 /* =========================================================
-3. Товары: фото из папки Items/
-   код = файл: item_<код>1 = фронт, item_<код>2 = вид при наведении
+3. Товары
 ========================================================= */
 const PRODUCTS=[
 {code:'a', name:'Жилет костюмный',    price:'24 500 ₽', desc:'футер 480 г/м²'},
@@ -418,9 +435,8 @@ const STEPS=[
 {n:'04',k:'DA',t:'Когда цвет ровно тот, что вы искали, и больше его нет ни у кого.'},
 ];
 const heroLayer=$('#heroLayer'),stmtLayer=$('#stmtLayer'),stmtInner=$('#stmtInner'),vidLayer=$('#vidLayer');
-const railIdx=$('#railIdx'),railFill=$('#railFill');
 let idx=0,locked=false,curStep=-1,stmtWasOn=false,colSeen=false;
-let setCam=()=>{}; /* подключается из 3D-модуля */
+let setCam=()=>{};
 function renderStep(s){
 const d=STEPS[s];
 stmtInner.innerHTML=
@@ -432,7 +448,7 @@ function applyView(){
 heroLayer.classList.toggle('off',idx!==0);
 const on=idx>=1&&idx<=3;
 stmtLayer.classList.toggle('on',on);
-stmtLayer.classList.toggle('left',idx===1);   /* экран 2 — абзац слева */
+stmtLayer.classList.toggle('left',idx===1);
 if(on){
 const s=idx-1;
 if(s!==curStep){
@@ -450,9 +466,9 @@ stmtWasOn=on;
 colLayer.classList.toggle('on',idx===4);
 if(idx===4&&!colSeen){colSeen=true;colLayer.classList.add('in');sliderGo();}
 vidLayer.classList.toggle('on',idx===5);
+/* НОВОЕ: после первого экрана шапка становится узкой чёрной */
+document.body.classList.toggle('scrolled',idx>0);
 setCam(Math.min(idx,3));
-railIdx.textContent=String(idx+1).padStart(2,'0');
-railFill.style.height=(idx/5*100)+'%';
 }
 function go(n){
 n=clamp(n,0,5);
@@ -465,14 +481,15 @@ let acc=0,lastWheel=0;
 addEventListener('wheel',e=>{
 if(document.body.classList.contains('menu-open')){e.preventDefault();return;}
 if(idx===4){
-const canDown=colLayer.scrollTop+colLayer.clientHeight<colLayer.scrollHeight-2;
-const canUp=colLayer.scrollTop>2;
+/* ИЗМЕНЕНО: допуск границы увеличен — переход к видео срабатывает мягче */
+const canDown=colLayer.scrollTop+colLayer.clientHeight<colLayer.scrollHeight-8;
+const canUp=colLayer.scrollTop>4;
 if(e.deltaY>0&&canDown)return;
 if(e.deltaY<0&&canUp)return;
 }
 if(idx===5){
-if(e.deltaY<0&&vidLayer.scrollTop>2)return;
-if(e.deltaY>0&&vidLayer.scrollTop+vidLayer.clientHeight<vidLayer.scrollHeight-2)return;
+if(e.deltaY<0&&vidLayer.scrollTop>4)return;
+if(e.deltaY>0&&vidLayer.scrollTop+vidLayer.clientHeight<vidLayer.scrollHeight-8)return;
 }
 e.preventDefault();
 if(locked){acc=0;return;}
@@ -482,7 +499,8 @@ lastWheel=now;
 acc+=e.deltaY;
 if(Math.abs(acc)>70){const dir=acc>0?1:-1;acc=0;go(idx+dir);}
 },{passive:false});
-/* свайпы */
+/* свайпы — ИЗМЕНЕНО: на экране коллекции экран меняется у краёв,
+иначе на смартфоне со слайдера нельзя было уйти на видео */
 let tY=null,tX=null;
 addEventListener('touchstart',e=>{tY=e.touches[0].clientY;tX=e.touches[0].clientX;},{passive:true});
 addEventListener('touchend',e=>{
@@ -490,7 +508,12 @@ if(tY===null)return;
 const dy=tY-e.changedTouches[0].clientY, dx=tX-e.changedTouches[0].clientX;
 tY=null;
 if(Math.abs(dy)>60&&Math.abs(dy)>Math.abs(dx)){
-if(idx===4&&e.target.closest('#colLayer')&&colLayer.scrollHeight>colLayer.clientHeight+8)return;
+if(idx===4&&e.target.closest('#colLayer')){
+const atBottom=colLayer.scrollTop+colLayer.clientHeight>=colLayer.scrollHeight-24;
+const atTop=colLayer.scrollTop<=4;
+if(dy>0&&!atBottom)return; /* листаем коллекцию вниз — не мешаем */
+if(dy<0&&!atTop)return;    /* листаем коллекцию вверх — не мешаем */
+}
 if(idx===5&&e.target.closest('#vidLayer')&&vidLayer.scrollHeight>vidLayer.clientHeight+8)return;
 go(idx+(dy>0?1:-1));
 }
@@ -509,7 +532,7 @@ if(g){e.preventDefault();go(+g.dataset.go);}
 });
 applyView();
 /* =========================================================
-6. Видео-экран: автоплей, пауза вне экрана, звук и пауза
+6. Видео-экран
 ========================================================= */
 const vid=$('#brandVideo'),vidSound=$('#vidSound'),vidPause=$('#vidPause');
 if(vid){
@@ -526,12 +549,12 @@ vid.addEventListener('play',()=>vidPause.textContent='❚❚');
 vid.addEventListener('pause',()=>vidPause.textContent='▶');
 vid.addEventListener('error',()=>showToast('<b>brandvideo.mp4</b> не найден — положите видео рядом с index.html'));
 new IntersectionObserver(es=>es.forEach(en=>{
-if(reduced)return;               /* при сниженной анимации автоплей не включаем */
+if(reduced)return;
 if(en.isIntersecting){vid.play().catch(()=>{});}else{vid.pause();}
 }),{threshold:.2}).observe(vid);
 }
 /* =========================================================
-7. 3D-сцена: GLB + камеры + студийный свет + DOF + bloom
+7. 3D-сцена
 ========================================================= */
 async function init3D(){
 const THREE=await import('three');
@@ -546,8 +569,8 @@ const renderer=new THREE.WebGLRenderer({antialias:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));
 renderer.setSize(innerWidth,innerHeight);
 renderer.outputColorSpace=THREE.SRGBColorSpace;
-renderer.toneMapping=THREE.ACESFilmicToneMapping;   /* мягкий, «чистый» свет */
-renderer.toneMappingExposure=1.12;                  /* осветление сцены */
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=1.12;
 $('#stage').appendChild(renderer.domElement);
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(PAPER);
@@ -557,18 +580,13 @@ const composer=new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene,cam));
 const bokeh=new BokehPass(scene,cam,{focus:8,aperture:0,maxblur:0});
 composer.addPass(bokeh);
-const bloom=new UnrealBloomPass(                    /* лёгкое свечение бликов */
-new THREE.Vector2(innerWidth,innerHeight),
-.26,   /* strength — сила */
-.55,   /* radius */
-.82    /* threshold — порог, светятся только яркие блики */
-);
+const bloom=new UnrealBloomPass(
+new THREE.Vector2(innerWidth,innerHeight),.26,.55,.82);
 composer.addPass(bloom);
 composer.addPass(new OutputPass());
 let center=new THREE.Vector3(),radius=6,fb=null;
 const cams=[];
 const dofSet=new Set(['camera3','camera4']);
-/* студийная схема: ключевой + заполняющий + контровой + мягкая полусфера */
 function setupLights(){
 scene.add(new THREE.HemisphereLight(0xffffff,0xc9c7bf,1.2));
 const lamp=(color,i,dx,dy,dz)=>{
@@ -579,9 +597,9 @@ l.target.position.copy(center);
 scene.add(l,l.target);
 return l;
 };
-lamp(0xffffff,2.6, 1.4,1.8, 1.2);  /* ключевой — основной рисунок */
-lamp(0xf1f3f8,1.1,-1.6, .6,  .9);  /* заполняющий — холоднее и мягче */
-lamp(0xffffff,2.0, -.5,1.4,-1.6);  /* контровой — блик по краю */
+lamp(0xffffff,2.6, 1.4,1.8, 1.2);
+lamp(0xf1f3f8,1.1,-1.6, .6,  .9);
+lamp(0xffffff,2.0, -.5,1.4,-1.6);
 }
 function buildFallback(){
 const g=new THREE.Group();
@@ -645,7 +663,6 @@ $('#ldStatus').textContent='GLB не найден — временная сце�
 fitFog();
 setupLights();
 if(cams.length<4)console.warn('Найдено камер:',cams.length,'— недостающие дополнены дефолтными');
-/* состояние камеры + плавные переходы */
 const state={pos:new THREE.Vector3(),quat:new THREE.Quaternion(),fov:42};
 const tgt  ={pos:new THREE.Vector3(),quat:new THREE.Quaternion(),fov:42,dof:0,focus:8};
 let dofAmt=0,focus=8;
@@ -665,7 +682,6 @@ if(!reduced)addEventListener('pointermove',e=>{
 mouse.tx=(e.clientX/innerWidth-.5)*2;
 mouse.ty=(e.clientY/innerHeight-.5)*2;
 },{passive:true});
-/* цикл */
 let prevT=performance.now();
 renderer.setAnimationLoop(t=>{
 const dt=Math.min(.05,(t-prevT)/1000);prevT=t;
@@ -681,7 +697,6 @@ cam.position.copy(state.pos);
 cam.quaternion.copy(state.quat);
 cam.fov=state.fov;cam.updateProjectionMatrix();
 if(!reduced){
-/* очень слабый параллакс */
 const par=radius*.001;
 cam.translateX(mouse.x*par);
 cam.translateY(-mouse.y*par*.5);

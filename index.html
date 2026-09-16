@@ -569,6 +569,9 @@ renderer.setSize(innerWidth,innerHeight);
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure=1.12;
+/* НОВОЕ: мягкие тени */
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.VSMShadowMap;
 $('#stage').appendChild(renderer.domElement);
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(PAPER);
@@ -582,11 +585,12 @@ const bloom=new UnrealBloomPass(
 new THREE.Vector2(innerWidth,innerHeight),.26,.55,.82);
 composer.addPass(bloom);
 composer.addPass(new OutputPass());
-let center=new THREE.Vector3(),radius=6,fb=null;
+/* НОВОЕ: сюда добавлены ссылки на поле и его эффект */
+let center=new THREE.Vector3(),radius=6,fb=null,field=null,fieldFX=null;
 const cams=[];
 const dofSet=new Set(['camera3','camera4']);
 function setupLights(){
-scene.add(new THREE.HemisphereLight(0xffffff,0xc9c7bf,1.2));
+scene.add(new THREE.HemisphereLight(0xffffff,0xc9c7bf,1.15));
 const lamp=(color,i,dx,dy,dz)=>{
 const l=new THREE.DirectionalLight(color,i);
 const off=new THREE.Vector3(dx,dy,dz).normalize().multiplyScalar(Math.max(radius*2.5,10));
@@ -595,15 +599,33 @@ l.target.position.copy(center);
 scene.add(l,l.target);
 return l;
 };
-lamp(0xffffff,2.6, 1.4,1.8, 1.2);
-lamp(0xf1f3f8,1.1,-1.6, .6,  .9);
-lamp(0xffffff,2.0, -.5,1.4,-1.6);
+/* фоновые лампы чуть приглушены, чтобы солнце читалось */
+lamp(0xffffff,1.9,  1.4,1.8, 1.2);
+lamp(0xf1f3f8, .9, -1.6, .6,  .9);
+lamp(0xffffff,1.4,  -.5,1.4,-1.6);
+/* НОВОЕ: СОЛНЦЕ — низкий угол даёт длинные мягкие тени */
+const sun=new THREE.DirectionalLight(0xfff1de,2.0);
+const SUN_DIR=new THREE.Vector3(1.9,.85,1.25); // чем меньше 2-я компонента, тем длиннее тени
+sun.position.copy(center).add(SUN_DIR.clone().normalize().multiplyScalar(radius*2.6));
+sun.target.position.copy(center);
+sun.castShadow=true;
+const S=radius*1.9; // охват сцены теневой камерой
+const sc=sun.shadow.camera;
+sc.left=-S;sc.right=S;sc.top=S;sc.bottom=-S;
+sc.near=radius*.1;sc.far=radius*7;
+sc.updateProjectionMatrix();
+sun.shadow.mapSize.set(2048,2048);
+sun.shadow.radius=18;        // мягкость пятна (для VSM)
+sun.shadow.blurSamples=24;
+sun.shadow.bias=-0.0001;
+scene.add(sun,sun.target);
 }
 function buildFallback(){
 const g=new THREE.Group();
 const knot=new THREE.Mesh(
 new THREE.TorusKnotGeometry(1.55,.46,220,36),
 new THREE.MeshStandardMaterial({color:0x191919,roughness:.34,metalness:.08}));
+knot.castShadow=true; /* НОВОЕ */
 g.add(knot);
 const ring=new THREE.Mesh(new THREE.TorusGeometry(3.1,.012,10,160),
 new THREE.MeshBasicMaterial({color:0x161616}));
@@ -611,13 +633,23 @@ ring.rotation.x=Math.PI/2.35;g.add(ring);
 const N=70,inst=new THREE.InstancedMesh(
 new THREE.IcosahedronGeometry(.05,0),
 new THREE.MeshStandardMaterial({color:0x333330,roughness:.5}),N);
+inst.castShadow=true; /* НОВОЕ */
 const d=new THREE.Object3D();
 for(let i=0;i<N;i++){
 const v=new THREE.Vector3().randomDirection().multiplyScalar(3.4+Math.random()*1.9);
 d.position.copy(v);d.scale.setScalar(.5+Math.random()*1.3);d.updateMatrix();
 inst.setMatrixAt(i,d.matrix);
 }
-g.add(inst);scene.add(g);
+g.add(inst);
+/* НОВОЕ: невидимый «пол», принимающий тень во временной сцене */
+const ground=new THREE.Mesh(
+new THREE.CircleGeometry(radius*1.5,64),
+new THREE.ShadowMaterial({opacity:.25}));
+ground.rotation.x=-Math.PI/2;
+ground.position.y=-radius*.38;
+ground.receiveShadow=true;
+g.add(ground);
+scene.add(g);
 return {knot,inst,ring};
 }
 function defaultCams(){
@@ -647,6 +679,17 @@ const u=o.userData||{};
 if(u.dof===true||u.dof===1||u.dof==='true')dofSet.add(o.name.toLowerCase());
 }
 });
+/* НОВОЕ: тени на всех мешах; поиск плоскости поля.
+   Если в GLB есть служебные меши (коллизии, хелперы), которые не
+   должны отбрасывать тень — исключите их здесь по имени. */
+glb.scene.traverse(o=>{
+if(o.isMesh){
+o.castShadow=true;o.receiveShadow=true;
+if(o.name.toLowerCase().startsWith('field'))field=o;
+}
+});
+if(field){field.castShadow=false;field.receiveShadow=true;}
+else console.warn('Меш "field" не найден в GLB — интерактивная сетка отключена');
 cams.sort((a,b)=>{
 const na=+((a.name.match(/(\d+)/)||[])[1]||99);
 const nb=+((b.name.match(/(\d+)/)||[])[1]||99);
@@ -660,7 +703,133 @@ $('#ldStatus').textContent='GLB не найден — временная сце�
 }
 fitFog();
 setupLights();
+/* НОВОЕ: интерактивная сетка на поле */
+if(field)fieldFX=createFieldFX(field);
 if(cams.length<4)console.warn('Найдено камер:',cams.length,'— недостающие дополнены дефолтными');
+/* ---------------------------------------------------------
+   НОВОЕ: эффект «проявляющейся» сетки на field.
+   Курсор рейкастится по полю, оставляет шлейф из точек;
+   сетка загорается вокруг них и плавно гаснет.
+--------------------------------------------------------- */
+const TRAIL=18,LIFE=1.1;              // длина шлейфа, сек
+const _ray=new THREE.Raycaster();
+const _ndc=new THREE.Vector2(10,10);  // «курсор вне экрана»
+const _v=new THREE.Vector3();
+function createFieldFX(fieldMesh){
+const geo=fieldMesh.geometry;
+if(!geo||!geo.attributes.position)return null;
+if(!geo.attributes.normal)geo.computeVertexNormals();
+/* 1) средняя нормаль плоскости → две тангенциальные оси */
+const n=new THREE.Vector3(),na=geo.attributes.normal;
+const step=Math.max(1,na.count>>6);
+for(let i=0;i<na.count;i+=step){n.x+=na.getX(i);n.y+=na.getY(i);n.z+=na.getZ(i);}
+if(n.lengthSq()<1e-6)n.set(0,1,0);
+n.normalize();
+const ax=[Math.abs(n.x),Math.abs(n.y),Math.abs(n.z)];
+const tAx=[0,1,2].filter(i=>i!==ax.indexOf(Math.max(ax[0],ax[1],ax[2])));
+/* 2) копия геометрии + атрибут aSurf (2D-координата вершины в метрах плоскости) */
+const g2=geo.clone(),pos=g2.attributes.position;
+const surf=new Float32Array(pos.count*2);
+const mn=[1e9,1e9],mx=[-1e9,-1e9];
+for(let i=0;i<pos.count;i++){
+_v.fromBufferAttribute(pos,i);
+const x=_v.getComponent(tAx[0]),y=_v.getComponent(tAx[1]);
+surf[i*2]=x;surf[i*2+1]=y;
+mn[0]=Math.min(mn[0],x);mx[0]=Math.max(mx[0],x);
+mn[1]=Math.min(mn[1],y);mx[1]=Math.max(mx[1],y);
+}
+g2.setAttribute('aSurf',new THREE.BufferAttribute(surf,2));
+const size=Math.max(mx[0]-mn[0],mx[1]-mn[1]); // габарит поля в метрах
+const cell=size/26;                           // шаг сетки
+const R=size*.085;                            // радиус проявки
+/* 3) шейдер оверлея */
+const mat=new THREE.ShaderMaterial({
+transparent:true,depthWrite:false,
+uniforms:{
+uPts:{value:Array.from({length:TRAIL},()=>new THREE.Vector4())},
+uCount:{value:0},
+uTime:{value:0},
+uCell:{value:cell},
+uInk:{value:new THREE.Color(0x141414)},
+uAccent:{value:new THREE.Color(0xe8480e)},
+},
+vertexShader:`
+attribute vec2 aSurf;
+varying vec2 vS;
+void main(){
+vS=aSurf;
+gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);
+}`,
+fragmentShader:`
+#define TRAIL ${TRAIL}
+uniform vec4 uPts[TRAIL];
+uniform int  uCount;
+uniform float uTime,uCell;
+uniform vec3 uInk,uAccent;
+varying vec2 vS;
+float grid(vec2 p,float c){
+vec2 g=p/c;
+vec2 f=abs(fract(g-.5)-.5)/fwidth(g);
+return 1.-min(min(f.x,f.y),1.);
+}
+void main(){
+float glow=0.;
+for(int i=0;i<TRAIL;i++){
+if(i>=uCount)break;
+vec4 P=uPts[i];
+glow+=P.z*(1.-smoothstep(P.w*.15,P.w,length(vS-P.xy)));
+}
+glow=clamp(glow,0.,1.)*(.92+.08*sin(uTime*3.+vS.x*.7+vS.y*.5));
+float fine =grid(vS,uCell);
+float major=grid(vS,uCell*4.);
+vec2 g=vS/uCell;
+vec2 fd=abs(fract(g-.5)-.5)/fwidth(g);
+float dots=1.-min(max(fd.x,fd.y),1.);       // точки на пересечениях
+float idle=.045*(fine*.5+major);            // едва видимый чертёж всегда
+float rev =glow*(fine*.5+major*.9+dots*.9); // проявление за курсором
+float a=clamp(idle+rev,0.,.95);
+if(a<.004)discard;
+vec3 col=mix(uInk,uAccent,clamp(dots*glow*1.25,0.,1.));
+gl_FragColor=vec4(col,a);
+}`
+});
+const overlay=new THREE.Mesh(g2,mat);
+overlay.renderOrder=20;
+overlay.position.copy(n).multiplyScalar(Math.max(size*.0005,.01)); // чуть над плоскостью
+fieldMesh.add(overlay);
+/* 4) шлейф точек + рейкаст каждый кадр */
+const pts=[];
+function update(camera,now){
+camera.updateMatrixWorld();
+fieldMesh.updateWorldMatrix(true,false);
+if(_ndc.x<5){
+_ray.setFromCamera(_ndc,camera);
+const hit=_ray.intersectObject(fieldMesh,false)[0];
+if(hit){
+_v.copy(hit.point);fieldMesh.worldToLocal(_v);
+pts.unshift({x:_v.getComponent(tAx[0]),y:_v.getComponent(tAx[1]),t:now});
+if(pts.length>TRAIL)pts.pop();
+}
+}
+const U=mat.uniforms;U.uTime.value=now;
+let cnt=0;
+for(let i=0;i<TRAIL;i++){
+const p=pts[i],u=U.uPts.value[i];
+if(p){
+const k=clamp(1-(now-p.t)/LIFE,0,1);
+if(k>0){u.set(p.x,p.y,Math.pow(k,1.7),R*(.55+.75*(1-k)));cnt=i+1;}
+else u.set(0,0,0,0);
+}else u.set(0,0,0,0);
+}
+U.uCount.value=cnt;
+}
+return {update};
+}
+/* НОВОЕ: следим за курсором в NDC (работает и для тача) */
+addEventListener('pointermove',e=>{
+_ndc.set((e.clientX/innerWidth)*2-1,-(e.clientY/innerHeight)*2+1);
+},{passive:true});
+addEventListener('pointerout',e=>{if(!e.relatedTarget)_ndc.set(10,10);});
 const state={pos:new THREE.Vector3(),quat:new THREE.Quaternion(),fov:42};
 const tgt  ={pos:new THREE.Vector3(),quat:new THREE.Quaternion(),fov:42,dof:0,focus:8};
 let dofAmt=0,focus=8;
@@ -701,6 +870,8 @@ cam.translateY(-mouse.y*par*.5);
 cam.rotateY(mouse.x*.003);
 cam.rotateX(-mouse.y*.002);
 }
+/* НОВОЕ: обновление сетки — только на экранах, где видна 3D-сцена */
+if(fieldFX&&idx<=3)fieldFX.update(cam,t*.001);
 bokeh.enabled=dofAmt>.004;
 bokeh.uniforms.focus.value=focus;
 bokeh.uniforms.aperture.value=.0028*dofAmt;

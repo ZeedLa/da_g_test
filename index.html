@@ -52,8 +52,8 @@ animation:grain 9s steps(6) infinite}
 /* ---------- верхняя панель ---------- */
 .topbar{position:fixed;top:0;left:0;right:0;z-index:50;display:flex;justify-content:space-between;align-items:flex-start;padding:26px 34px;
 border-bottom:1px solid transparent;
-transition:background .45s ease,padding .45s cubic-bezier(.2,.8,.2,1),border-color .45s ease} /* ИЗМЕНЕНО: транзишн для чёрной шапки */
-.logo img{height:34px;width:auto;transition:height .45s cubic-bezier(.2,.8,.2,1),transform .5s cubic-bezier(.2,.8,.2,1),filter .45s ease}
+transition:background .45s ease,padding .45s cubic-bezier(.2,.8,.2,1),border-color .45s ease}
+.logo img{height:34px;width:auto;transition:height .45s cubic-bezier(.2,.8,.2,1),transform .5s cubic-bezier(.2,.8,.2,1)}
 .logo:hover img{transform:rotate(-3deg)}
 .logo-txt{font-weight:800;letter-spacing:.06em;font-size:1.35rem}
 .logo-txt sup{font-size:.5em;color:var(--accent)}
@@ -66,18 +66,16 @@ transition:background .45s ease,padding .45s cubic-bezier(.2,.8,.2,1),border-col
 .nl:hover sup{transform:translateY(-2px)}
 .nl:hover::after{transform:scaleX(1);transform-origin:left}
 .nl b{font-weight:700}
-/* ---------- НОВОЕ: шапка после первого экрана — узкая чёрная, меню горизонтально ---------- */
-body.scrolled .topbar{background:#111;border-bottom-color:rgba(255,255,255,.16);padding:10px 24px;align-items:center}
-body.scrolled .logo img{height:24px;filter:brightness(0) invert(1)} /* логотип становится белым */
-body.scrolled .logo-txt{color:var(--paper);font-size:1.05rem}
+/* ---------- шапка после первого экрана: узкая белая, меню горизонтально ---------- */
+body.scrolled .topbar{background:#fff;border-bottom-color:rgba(20,20,20,.14);padding:10px 24px;align-items:center}
+body.scrolled .logo img{height:24px}
+body.scrolled .logo-txt{color:var(--ink);font-size:1.05rem}
 body.scrolled .nav{flex-direction:row;align-items:center;gap:1.6rem}
-body.scrolled .nl{color:#fff;font-size:.72rem}
-body.scrolled .nl::after{background:#fff}
-/* ---------- бургер: вынесен из шапки (ИЗМЕНЕНО), чтобы всегда быть поверх меню ---------- */
+body.scrolled .nl{color:var(--ink);font-size:.72rem}
+body.scrolled .nl::after{background:var(--ink)}
+/* ---------- бургер: самостоятельный элемент (в HTML — вне шапки) ---------- */
 .burger{display:none;flex-direction:column;gap:6px;padding:8px;position:fixed;top:22px;right:26px;z-index:80}
-.burger i{display:block;width:26px;height:2px;background:var(--ink);transition:transform .4s,opacity .3s,background .3s}
-body.scrolled .burger i{background:#fff}
-body.menu-open .burger i{background:var(--ink)} /* крестик над светлой подложкой меню */
+.burger i{display:block;width:26px;height:2px;background:var(--ink);transition:transform .4s,opacity .3s}
 body.menu-open .burger i:nth-child(1){transform:translateY(8px) rotate(45deg)}
 body.menu-open .burger i:nth-child(2){opacity:0}
 body.menu-open .burger i:nth-child(3){transform:translateY(-8px) rotate(-45deg)}
@@ -85,15 +83,6 @@ body.menu-open .burger i:nth-child(3){transform:translateY(-8px) rotate(-45deg)}
 body.menu-open .mmenu{clip-path:inset(0 0 0% 0)}
 .mmenu a{font-family:var(--display);font-size:clamp(2rem,8vw,3.4rem);font-weight:250;text-transform:uppercase;letter-spacing:-.02em;display:flex;gap:1rem;align-items:baseline;border-bottom:1px solid var(--line);padding:.5rem 0}
 .mmenu a sup{font-size:.8rem;font-weight:600;color:var(--accent)}
-/* ---------- НОВОЕ: футер с огромной надписью ---------- */
-.big-foot{margin-top:5rem;padding-top:1.6rem;border-top:1px solid var(--line)}
-.bf-meta{display:flex;justify-content:space-between;gap:1rem;font-size:.66rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);flex-wrap:wrap;margin-bottom:2.4rem}
-.bf-word{font-family:var(--display);font-weight:230;line-height:.78;letter-spacing:-.045em;text-transform:uppercase;white-space:nowrap;user-select:none;
-font-size:clamp(4rem,17vw,15rem);color:transparent;-webkit-text-stroke:2px var(--ink);
-transition:color .6s ease;padding-bottom:.06em}
-.bf-word sup{font-size:.18em;-webkit-text-stroke:0;color:var(--accent)}
-.bf-word:hover{color:var(--ink)}
-@supports not (-webkit-text-stroke:1px #000){.bf-word{color:var(--ink)}}
 /* ---------- слои-экраны ---------- */
 .layer{position:fixed;inset:0;z-index:1;transition:opacity .55s ease,transform .7s cubic-bezier(.65,.05,.25,1)}
 /* экран 1 */
@@ -170,10 +159,15 @@ filter:blur(46px);}
 .price{font-size:.86rem;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
 .col-note{margin-top:3rem;font-size:.66rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
 .col-note b{color:var(--accent)}
-/* появления */
-.rv{opacity:0;transform:translateY(22px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.8,.2,1);transition-delay:var(--d,0s)}
-.rv.in{opacity:1;transform:none}
-#colLayer.in .rv{opacity:1;transform:none}
+/* ---------- футер с огромной надписью ---------- */
+.big-foot{margin-top:5rem;padding-top:1.6rem;border-top:1px solid var(--line)}
+.bf-meta{display:flex;justify-content:space-between;gap:1rem;font-size:.66rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);flex-wrap:wrap;margin-bottom:2.4rem}
+.bf-word{font-family:var(--display);font-weight:230;line-height:.78;letter-spacing:-.045em;text-transform:uppercase;white-space:nowrap;user-select:none;
+font-size:clamp(4rem,17vw,15rem);color:transparent;-webkit-text-stroke:2px var(--ink);
+transition:color .6s ease;padding-bottom:.06em}
+.bf-word sup{font-size:.18em;-webkit-text-stroke:0;color:var(--accent)}
+.bf-word:hover{color:var(--ink)}
+@supports not (-webkit-text-stroke:1px #000){.bf-word{color:var(--ink)}}
 /* экран 6 — видео */
 #vidLayer{background:#0a0a09;border-top:1.5px solid var(--ink);transform:translateY(103%);transition:transform .75s cubic-bezier(.65,.05,.25,1);touch-action:pan-y}
 #vidLayer.on{transform:none}
@@ -185,6 +179,10 @@ text-shadow:0 1px 10px rgba(0,0,0,.55)}
 .vctl{width:46px;height:46px;border:1.5px solid #fff;color:#fff;display:grid;place-items:center;
 font-size:.9rem;font-weight:600;mix-blend-mode:difference;transition:background .25s,color .25s}
 .vctl:hover{background:#fff;color:#000}
+/* появления */
+.rv{opacity:0;transform:translateY(22px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.8,.2,1);transition-delay:var(--d,0s)}
+.rv.in{opacity:1;transform:none}
+#colLayer.in .rv{opacity:1;transform:none}
 /* тост */
 #toast{position:fixed;left:50%;bottom:30px;transform:translate(-50%,180%);z-index:90;background:var(--ink);color:var(--paper);padding:.9em 1.6em;font-size:.72rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;transition:transform .5s cubic-bezier(.2,.9,.25,1);max-width:90vw;text-align:center}
 #toast.show{transform:translate(-50%,0)}
@@ -199,7 +197,7 @@ font-size:.9rem;font-weight:600;mix-blend-mode:difference;transition:background 
 @keyframes ld{0%{transform:translateX(-110%)}100%{transform:translateX(300%)}}
 .ld-status{font-size:.62rem;font-weight:600;letter-spacing:.26em;text-transform:uppercase;color:var(--mut)}
 @media (max-width:1150px){.card{flex-basis:calc((100% - 24px)/2)}}
-@media (max-width:1000px){.hero-side{display:none}} /* ИЗМЕНЕНО: rail удалён */
+@media (max-width:1000px){.hero-side{display:none}}
 @media (max-width:760px){
 .nav{display:none}
 .burger{display:flex;top:14px;right:12px}

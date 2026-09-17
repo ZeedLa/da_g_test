@@ -27,16 +27,16 @@ brandvideo.mp4    — фильм бренда (экран после колле�
 --accent:#6290B6;
 --font:'Inter',system-ui,sans-serif;
 --display:var(--font); /* ← заменить на cygre при подключении */
-/* НОВОЕ: динамический цвет подложки — равен верхнему пикселю 3D-кадра */
---scene-bg:#dadada;
+/* динамический цвет плашки: компоненты RGB, всегда серый #dadada…#ffffff */
+--scene-bg:218,218,218;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;overflow:hidden}
 body{
 font-family:var(--font);
 font-optical-sizing:auto;
-/* ИЗМЕНЕНО: фон теперь берётся из сцены (см. сэмплинг в разделе 7) */
-background:var(--scene-bg,var(--paper));
+/* фон = сэмпл верхнего края 3D-кадра (см. раздел 7) */
+background:rgb(var(--scene-bg));
 color:var(--ink);
 -webkit-font-smoothing:antialiased;
 }
@@ -48,6 +48,8 @@ img{display:block}
 /* ---------- сцена ---------- */
 #stage{position:fixed;inset:0;z-index:0;background:radial-gradient(120% 90% at 50% 40%,#f2f1ec 0%,var(--paper) 55%,#dcdad2 100%)}
 #stage canvas{display:block;width:100%;height:100%}
+/* НОВОЕ: градиентный фейд плашки поверх 3D-сцены (виден только на смартфоне) */
+#edgeFade{display:none}
 .grain{position:fixed;inset:-50%;z-index:70;pointer-events:none;opacity:.05;mix-blend-mode:multiply;
 background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
 animation:grain 9s steps(6) infinite}
@@ -77,11 +79,15 @@ body.scrolled .nav{flex-direction:row;align-items:center;gap:1.6rem}
 body.scrolled .nl{color:var(--ink);font-size:.72rem}
 body.scrolled .nl::after{background:var(--ink)}
 /* ---------- бургер ---------- */
-.burger{display:none;flex-direction:column;gap:6px;padding:8px;position:fixed;top:22px;right:26px;z-index:80}
+.burger{display:none;flex-direction:column;gap:6px;padding:8px;position:fixed;top:22px;right:26px;z-index:80;
+transition:top .45s cubic-bezier(.2,.8,.2,1),right .45s cubic-bezier(.2,.8,.2,1),transform .45s cubic-bezier(.2,.8,.2,1)}
 .burger i{display:block;width:26px;height:2px;background:var(--ink);transition:transform .4s,opacity .3s}
 body.menu-open .burger i:nth-child(1){transform:translateY(8px) rotate(45deg)}
 body.menu-open .burger i:nth-child(2){opacity:0}
 body.menu-open .burger i:nth-child(3){transform:translateY(-8px) rotate(-45deg)}
+/* ИЗМЕНЕНО: бургер ведёт себя как лого — при скролле уменьшается
+и центрируется по узкой шапке (38px), не вылезая за неё */
+body.scrolled .burger{top:2px;right:9px;transform:scale(.6)}
 .mmenu{position:fixed;inset:0;z-index:60;background:var(--paper);display:flex;flex-direction:column;justify-content:center;padding:0 10vw;gap:1rem;clip-path:inset(0 0 100% 0);transition:clip-path .55s cubic-bezier(.75,0,.2,1)}
 body.menu-open .mmenu{clip-path:inset(0 0 0% 0)}
 .mmenu a{font-family:var(--display);font-size:clamp(2rem,8vw,3.4rem);font-weight:250;text-transform:uppercase;letter-spacing:-.02em;display:flex;gap:1rem;align-items:baseline;border-bottom:1px solid var(--line);padding:.5rem 0}
@@ -110,9 +116,7 @@ body.ready .h1 .ch{transform:none}
 .cue i{width:1px;height:46px;background:var(--line);position:relative;overflow:hidden;display:block}
 .cue i::after{content:'';position:absolute;left:0;top:-40%;width:100%;height:40%;background:var(--ink);animation:cue 1.8s cubic-bezier(.6,0,.4,1) infinite}
 @keyframes cue{to{top:110%}}
-/* ---------- экраны 2–4 ----------
-   ИЗМЕНЕНО: единое выравнивание по левому краю у всех трёх экранов,
-   сверху добавлен отступ, чтобы текст не заходил под шапку */
+/* ---------- экраны 2–4: единое выравнивание слева + отступ от шапки ---------- */
 #stmtLayer{display:flex;align-items:center;justify-content:flex-start;text-align:left;
 padding:11vh 24px 7vh max(24px,7vw);
 opacity:0;transform:translateY(26px);pointer-events:none;touch-action:none}
@@ -211,11 +215,14 @@ font-size:.9rem;font-weight:600;mix-blend-mode:difference;transition:background 
 .nav{display:none}
 .burger{display:flex;top:14px;right:12px}
 .topbar{padding:18px 20px}
-/* шапка красится в тот же динамический цвет — продолжает сцену */
-body.scrolled .topbar{padding:9px 16px;background:var(--scene-bg)}
+/* шапка продолжает плашку — тот же динамический серый */
+body.scrolled .topbar{padding:9px 16px;background:rgb(var(--scene-bg))}
 body.scrolled .logo img{height:20px}
 /* 3D-сцена занимает нижнюю часть экрана */
 #stage{top:44vh}
+/* НОВОЕ: фейд плашки поверх верхней кромки сцены — скрывает линию стыка */
+#edgeFade{display:block;position:fixed;left:0;right:0;top:calc(44vh - 1px);height:12vh;z-index:1;pointer-events:none;
+background:linear-gradient(to bottom, rgb(var(--scene-bg)) 0%, rgba(var(--scene-bg),0) 100%)}
 /* экран 1: текст в верхней зоне */
 #heroLayer{justify-content:flex-start;padding:13vh 20px 0}
 .h1{font-size:clamp(2.6rem,12vw,5.4rem)}
@@ -243,6 +250,7 @@ body.scrolled .logo img{height:20px}
 </head>
 <body>
 <div id="stage" aria-hidden="true"></div>
+<div id="edgeFade" aria-hidden="true"></div>
 <div class="grain" aria-hidden="true"></div>
 <header class="topbar" id="topbar">
 <a class="logo" href="#" data-go="0" aria-label="DAGOLF — на главную">
@@ -376,7 +384,6 @@ function cycleText(){
 if(typeof idx!=='undefined'&&idx!==0)return; /* крутим только на первом экране */
 const chars=cycleLine.querySelectorAll('.ch');
 if(!chars.length)return;
-/* уход: символы по одному уезжают вверх */
 chars.forEach((ch,i)=>{
 ch.style.transition=`transform .42s cubic-bezier(.55,0,.1,1) ${i*.022}s,opacity .38s ease ${i*.022}s`;
 ch.style.transform='translateY(-115%)';
@@ -385,8 +392,7 @@ ch.style.opacity='0';
 setTimeout(()=>{
 cycleIdx=(cycleIdx+1)%CYCLE_WORDS.length;
 buildCycleChars(CYCLE_WORDS[cycleIdx]);
-void cycleLine.offsetHeight; /* reflow */
-/* появление: новые символы поднимаются снизу */
+void cycleLine.offsetHeight;
 cycleLine.querySelectorAll('.ch').forEach((ch,i)=>{
 ch.style.transition=`transform .58s cubic-bezier(.2,.85,.25,1) ${i*.03}s,opacity .52s ease ${i*.03}s`;
 ch.style.transform='translateY(0)';
@@ -505,8 +511,7 @@ function applyView(){
 heroLayer.classList.toggle('off',idx!==0);
 const on=idx>=1&&idx<=3;
 stmtLayer.classList.toggle('on',on);
-/* ИЗМЕНЕНО: единое выравнивание слева для всех экранов 2–4 */
-stmtLayer.classList.toggle('left',on);
+stmtLayer.classList.toggle('left',on); /* единое выравнивание слева для экранов 2–4 */
 if(on){
 const s=idx-1;
 if(s!==curStep){
@@ -623,13 +628,13 @@ const {UnrealBloomPass}=await import('three/addons/postprocessing/UnrealBloomPas
 const {OutputPass}=await import('three/addons/postprocessing/OutputPass.js');
 const PAPER=0xe9e8e3;
 
-/* ИЗМЕНЕНО: рендерер занимает ровно #stage
+/* рендерер занимает ровно #stage
 (на десктопе весь экран, на смартфоне — нижние 56vh) */
 const stageEl=$('#stage');
 const stW=()=>stageEl.clientWidth||innerWidth;
 const stH=()=>stageEl.clientHeight||innerHeight;
 
-/* preserveDrawingBuffer нужен, чтобы читать пиксели кадра для фона */
+/* preserveDrawingBuffer нужен, чтобы читать пиксели кадра для плашки */
 const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));
 renderer.setSize(stW(),stH());
@@ -653,14 +658,14 @@ new THREE.Vector2(stW(),stH()),.26,.55,.82);
 composer.addPass(bloom);
 composer.addPass(new OutputPass());
 
-/* ---- НОВОЕ: бесшовная подложка ----
-Раз в ~110 мс усредняем верхнюю полосу кадра в 1 пиксель
-и плавно красим в него --scene-bg (фон страницы и шапку).
-При смене камер цвет подложки «доезжает» до нового цвета сцены. */
+/* ---- бесшовная плашка ----
+Сэмплируем верх кадра; ИЗМЕНЕНО: берём только яркость (оттенок игнорируется —
+коричневые объекты не попадают в плашку) и зажимаем результат
+в серый диапазон #dadada(218)…#ffffff(255). */
 const smp=document.createElement('canvas');smp.width=1;smp.height=1;
 const smpCtx=smp.getContext('2d',{willReadFrequently:true});
-const bgT={r:218,g:218,b:218};   // цель (сэмпл из кадра)
-const bgC={r:218,g:218,b:218};   // текущее сглаженное значение
+const bgT={r:218,g:218,b:218};
+const bgC={r:218,g:218,b:218};
 let lastSmp=0,lastCss='';
 function sampleTop(){
 const cv=renderer.domElement;
@@ -668,10 +673,13 @@ if(cv.width<4||cv.height<4)return;
 const strip=Math.max(2,Math.round(cv.height*.015));
 try{
 smpCtx.clearRect(0,0,1,1);
-/* верхняя полоса во всю ширину → усредняется в 1×1 */
 smpCtx.drawImage(cv,0,0,cv.width,strip,0,0,1,1);
 const d=smpCtx.getImageData(0,0,1,1).data;
-if(d[3]>0){bgT.r=d[0];bgT.g=d[1];bgT.b=d[2];}
+if(d[3]>0){
+const lum=.2126*d[0]+.7152*d[1]+.0722*d[2];
+const v=clamp(Math.round(lum),218,255); /* только серые #dadada…#ffffff */
+bgT.r=v;bgT.g=v;bgT.b=v;
+}
 }catch(e){}
 }
 
@@ -741,7 +749,6 @@ box.getCenter(center);
 radius=Math.max(.001,box.getSize(new THREE.Vector3()).length()/2);
 glb.scene.traverse(o=>{
 if(o.isCamera){
-/* подгоняем аспект камер из GLB под текущий контейнер */
 o.aspect=stW()/stH();o.updateProjectionMatrix();
 cams.push(o);
 const u=o.userData||{};
@@ -766,12 +773,16 @@ if(cams.length<4)console.warn('Найдено камер:',cams.length,'— не
 const state={pos:new THREE.Vector3(),quat:new THREE.Quaternion(),fov:42};
 const tgt  ={pos:new THREE.Vector3(),quat:new THREE.Quaternion(),fov:42,dof:0,focus:8};
 let dofAmt=0,focus=8;
+/* ИЗМЕНЕНО: кадрам 3–4 чуть расширяем угол обзора — сцена влезает целиком,
+позиции камер остаются «задуманными». Нужен другой масштаб — правьте числа. */
+const FOV_BOOST=[0,0,6,6];
 setCam=i=>{
-const c=cams[clamp(i,0,cams.length-1)];
+const ii=clamp(i,0,cams.length-1);
+const c=cams[ii];
 c.updateMatrixWorld();
 tgt.pos.setFromMatrixPosition(c.matrixWorld);
 tgt.quat.setFromRotationMatrix(c.matrixWorld);
-tgt.fov=c.fov||42;
+tgt.fov=(c.fov||42)+(FOV_BOOST[ii]||0);
 tgt.focus=tgt.pos.distanceTo(center);
 tgt.dof=dofSet.has((c.name||'').toLowerCase())?1:0;
 };
@@ -815,11 +826,11 @@ fb.ring.rotation.z+=dt*.05;fb.inst.rotation.y-=dt*.02;
 }
 composer.render();
 
-/* НОВОЕ: сэмпл верхнего края кадра → плавное перекрашивание подложки */
+/* сэмпл верхнего края кадра → плавное перекрашивание плашки и фейда */
 if(t-lastSmp>110){lastSmp=t;sampleTop();}
 const kb=reduced?1:1-Math.exp(-dt*4);
 bgC.r+=(bgT.r-bgC.r)*kb;bgC.g+=(bgT.g-bgC.g)*kb;bgC.b+=(bgT.b-bgC.b)*kb;
-const css=`rgb(${Math.round(bgC.r)},${Math.round(bgC.g)},${Math.round(bgC.b)})`;
+const css=`${Math.round(bgC.r)},${Math.round(bgC.g)},${Math.round(bgC.b)}`;
 if(css!==lastCss){lastCss=css;document.documentElement.style.setProperty('--scene-bg',css);}
 });
 setCam(Math.min(idx,3));

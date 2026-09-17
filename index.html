@@ -27,13 +27,16 @@ brandvideo.mp4    — фильм бренда (экран после колле�
 --accent:#6290B6;
 --font:'Inter',system-ui,sans-serif;
 --display:var(--font); /* ← заменить на cygre при подключении */
+/* НОВОЕ: динамический цвет подложки — равен верхнему пикселю 3D-кадра */
+--scene-bg:#dadada;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;overflow:hidden}
 body{
 font-family:var(--font);
 font-optical-sizing:auto;
-background:var(--paper);
+/* ИЗМЕНЕНО: фон теперь берётся из сцены (см. сэмплинг в разделе 7) */
+background:var(--scene-bg,var(--paper));
 color:var(--ink);
 -webkit-font-smoothing:antialiased;
 }
@@ -66,14 +69,14 @@ transition:background .45s ease,padding .45s cubic-bezier(.2,.8,.2,1),border-col
 .nl:hover sup{transform:translateY(-2px)}
 .nl:hover::after{transform:scaleX(1);transform-origin:left}
 .nl b{font-weight:700}
-/* ---------- шапка после первого экрана: узкая белая, меню горизонтально ---------- */
+/* ---------- шапка после первого экрана ---------- */
 body.scrolled .topbar{background:#dadada;border-bottom-color:rgba(20,20,20,.14);padding:10px 24px;align-items:center}
 body.scrolled .logo img{height:24px}
 body.scrolled .logo-txt{color:var(--ink);font-size:1.05rem}
 body.scrolled .nav{flex-direction:row;align-items:center;gap:1.6rem}
 body.scrolled .nl{color:var(--ink);font-size:.72rem}
 body.scrolled .nl::after{background:var(--ink)}
-/* ---------- бургер: самостоятельный элемент (в HTML — вне шапки) ---------- */
+/* ---------- бургер ---------- */
 .burger{display:none;flex-direction:column;gap:6px;padding:8px;position:fixed;top:22px;right:26px;z-index:80}
 .burger i{display:block;width:26px;height:2px;background:var(--ink);transition:transform .4s,opacity .3s}
 body.menu-open .burger i:nth-child(1){transform:translateY(8px) rotate(45deg)}
@@ -107,10 +110,14 @@ body.ready .h1 .ch{transform:none}
 .cue i{width:1px;height:46px;background:var(--line);position:relative;overflow:hidden;display:block}
 .cue i::after{content:'';position:absolute;left:0;top:-40%;width:100%;height:40%;background:var(--ink);animation:cue 1.8s cubic-bezier(.6,0,.4,1) infinite}
 @keyframes cue{to{top:110%}}
-/* экраны 2–4 */
-#stmtLayer{display:flex;align-items:center;justify-content:center;text-align:center;padding:0 24px;opacity:0;transform:translateY(26px);pointer-events:none;touch-action:none}
+/* ---------- экраны 2–4 ----------
+   ИЗМЕНЕНО: единое выравнивание по левому краю у всех трёх экранов,
+   сверху добавлен отступ, чтобы текст не заходил под шапку */
+#stmtLayer{display:flex;align-items:center;justify-content:flex-start;text-align:left;
+padding:11vh 24px 7vh max(24px,7vw);
+opacity:0;transform:translateY(26px);pointer-events:none;touch-action:none}
 #stmtLayer.on{opacity:1;transform:none;pointer-events:auto}
-#stmtLayer.left{justify-content:flex-start;text-align:left;padding:0 24px 0 max(24px,7vw)}
+#stmtLayer.left{justify-content:flex-start;text-align:left}
 #stmtLayer.left .kicker{justify-content:flex-start}
 #stmtLayer.left .txt{margin:0}
 .veil{max-width:620px;padding:3.2rem 3.4rem;position:relative}
@@ -119,11 +126,11 @@ background:radial-gradient(closest-side,rgba(246,245,240,.97),rgba(246,245,240,0
 filter:blur(46px);}
 #stmtInner{transition:opacity .34s ease,transform .34s ease}
 #stmtInner.fade{opacity:0;transform:translateY(-14px)}
-.kicker{display:flex;justify-content:center;align-items:center;gap:.8em;font-size:.66rem;font-weight:600;letter-spacing:.28em;text-transform:uppercase;margin-bottom:1.6rem}
+.kicker{display:flex;justify-content:flex-start;align-items:center;gap:.8em;font-size:.66rem;font-weight:600;letter-spacing:.28em;text-transform:uppercase;margin-bottom:1.6rem}
 .kicker b{color:var(--accent)}
 .kicker .ast{color:var(--accent);font-size:1rem;display:inline-block;animation:spin 14s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.txt{font-size:clamp(1.05rem,1.7vw,1.35rem);line-height:1.6;font-weight:430;max-width:44ch;margin:0 auto}
+.txt{font-size:clamp(1.05rem,1.7vw,1.35rem);line-height:1.6;font-weight:430;max-width:44ch;margin:0}
 #stmtInner .btn{margin-top:2.4rem}
 /* экран 5 — коллекция */
 #colLayer{background:var(--paper);border-top:1.5px solid var(--ink);transform:translateY(103%);overflow-y:auto;touch-action:pan-y;padding:9vh 34px 6vh;transition:transform .75s cubic-bezier(.65,.05,.25,1)}
@@ -196,59 +203,33 @@ font-size:.9rem;font-weight:600;mix-blend-mode:difference;transition:background 
 .ld-bar i{display:block;height:100%;width:40%;background:var(--ink);animation:ld 1.1s cubic-bezier(.5,0,.5,1) infinite}
 @keyframes ld{0%{transform:translateX(-110%)}100%{transform:translateX(300%)}}
 .ld-status{font-size:.62rem;font-weight:600;letter-spacing:.26em;text-transform:uppercase;color:var(--mut)}
-
-/* ═══════════════════════════════════════════
-   НОВОЕ: will-change для анимации цикла
-   ═══════════════════════════════════════════ */
-.h1 .line-cycle .ch{will-change:transform,opacity}
-
 @media (max-width:1150px){.card{flex-basis:calc((100% - 24px)/2)}}
 @media (max-width:1000px){.hero-side{display:none}}
 
-/* ═══════════════════════════════════════════
-   МОБИЛЬНАЯ РАСКЛАДКА: текст сверху, 3D снизу
-   ═══════════════════════════════════════════ */
+/* ---------- смартфон: текст сверху, 3D снизу, бесшовный фон ---------- */
 @media (max-width:760px){
 .nav{display:none}
 .burger{display:flex;top:14px;right:12px}
 .topbar{padding:18px 20px}
-body.scrolled .topbar{padding:9px 16px}
+/* шапка красится в тот же динамический цвет — продолжает сцену */
+body.scrolled .topbar{padding:9px 16px;background:var(--scene-bg)}
 body.scrolled .logo img{height:20px}
-
 /* 3D-сцена занимает нижнюю часть экрана */
 #stage{top:44vh}
-#stage::before{
-content:'';position:absolute;top:0;left:0;right:0;height:90px;
-background:linear-gradient(to bottom,var(--paper) 0%,rgba(218,218,218,.6) 50%,transparent 100%);
-z-index:2;pointer-events:none;transform:translateY(-100%);
-}
-
-/* Герой: текст в верхней части */
-#heroLayer{
-justify-content:flex-start;
-padding:14vh 20px 0;
-}
-.h1{font-size:clamp(2.4rem,10vw,5rem)}
-.hero-bottom{flex-direction:column;align-items:flex-start;gap:2rem}
+/* экран 1: текст в верхней зоне */
+#heroLayer{justify-content:flex-start;padding:13vh 20px 0}
+.h1{font-size:clamp(2.6rem,12vw,5.4rem)}
+.hero-meta{margin-bottom:1rem}
+.hero-bottom{flex-direction:column;align-items:flex-start;gap:1.8rem}
 .hero-right{align-items:flex-start}
-.hero-meta{margin-bottom:.8rem}
 .cue{display:none}
-
-/* Экраны 2-4: текст в верхней части */
-#stmtLayer{
-align-items:flex-start;
-padding-top:12vh;
-padding-bottom:56vh;
-}
-#stmtLayer.left{padding-left:20px}
+/* экраны 2–4: текст сверху, слева, с отступом от шапки */
+#stmtLayer{align-items:flex-start;padding:13vh 20px 0}
 .veil{padding:2rem 1.2rem}
-
-/* Коллекция и видео */
 #colLayer{padding:8vh 20px 5vh}
 .vid-cap{left:20px;bottom:86px}
 .vid-ctl{right:20px;bottom:20px}
 }
-
 @media (max-width:640px){.card{flex-basis:100%}}
 @media (hover:none){
 .card-buy{transform:none;position:static;border:1px solid var(--line);border-top-width:0}
@@ -309,7 +290,7 @@ padding-bottom:56vh;
 <!-- ЭКРАН 5 — слайдер -->
 <section class="layer" id="colLayer" aria-label="Коллекция">
 <div class="col-head rv">
-<h2 class="col-title">Коллекция №1<small>осень — зима '26 · 9 предметов</small></h2>
+<h2 class="col-title">Коллекция №1<small>осень — зима ’26 · 9 предметов</small></h2>
 <div class="col-nav">
 <button class="arr" id="prev" aria-label="Назад">←</button>
 <span class="count" id="count">01–04 / 09</span>
@@ -362,10 +343,9 @@ const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const lerp=(a,b,t)=>a+(b-a)*t, clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 
 /* =========================================================
-1. Типографика героя + ЦИКЛИЧЕСКАЯ СМЕНА ТЕКСТА
+1. Типографика героя + циклическая смена второй строки
 ========================================================= */
-const heroLines=$$('#heroTitle .line');
-heroLines.forEach(line=>{
+$$('#heroTitle .line').forEach(line=>{
 const txt=line.textContent; line.textContent='';
 [...txt].forEach((c,i)=>{
 const s=document.createElement('span');
@@ -377,70 +357,44 @@ line.appendChild(s);
 requestAnimationFrame(()=>document.body.classList.add('ready'));
 setTimeout(()=>$$('.hero-meta,.hero-right').forEach(el=>el.classList.add('in')),400);
 
-/* --- Циклическая анимация второй строки --- */
+/* --- цикл слов: «для гольфа» → «для жизни» → «для вас» … --- */
 const CYCLE_WORDS=['для гольфа','для жизни','для вас','для стиля','для побед'];
-const cycleLine=heroLines[1];
+const cycleLine=$$('#heroTitle .line')[1];
 let cycleIdx=0;
-
-/* Помечаем вторую строку для will-change */
-cycleLine.classList.add('line-cycle');
-
-function buildCycleChars(text, startHidden){
-cycleLine.innerHTML='';
-[...text].forEach((c,i)=>{
+function buildCycleChars(text){
+cycleLine.textContent='';
+[...text].forEach(c=>{
 const s=document.createElement('span');
-s.className='ch';
-s.textContent=c===' ' ? '\u00A0' : c;
-if(startHidden){
+s.className='ch';s.textContent=c===' '?'\u00A0':c;
 s.style.transition='none';
 s.style.transform='translateY(115%)';
 s.style.opacity='0';
-} else {
-s.style.transform='translateY(0)';
-s.style.opacity='1';
-}
 cycleLine.appendChild(s);
 });
 }
-
 function cycleText(){
-/* Анимируем только когда герой виден */
-if(typeof idx!=='undefined' && idx!==0) return;
-
+if(typeof idx!=='undefined'&&idx!==0)return; /* крутим только на первом экране */
 const chars=cycleLine.querySelectorAll('.ch');
-if(!chars.length) return;
-
-/* Фаза 1: уход — символы уходят вверх */
+if(!chars.length)return;
+/* уход: символы по одному уезжают вверх */
 chars.forEach((ch,i)=>{
-ch.style.transition=`transform 0.42s cubic-bezier(.55,0,.1,1) ${i*0.022}s, opacity 0.38s ease ${i*0.022}s`;
+ch.style.transition=`transform .42s cubic-bezier(.55,0,.1,1) ${i*.022}s,opacity .38s ease ${i*.022}s`;
 ch.style.transform='translateY(-115%)';
 ch.style.opacity='0';
 });
-
-const exitMs=420+chars.length*22+100;
-
 setTimeout(()=>{
 cycleIdx=(cycleIdx+1)%CYCLE_WORDS.length;
-/* Создаём новые символы внизу (скрытые) */
-buildCycleChars(CYCLE_WORDS[cycleIdx],true);
-
-/* Принудительный reflow */
-void cycleLine.offsetHeight;
-
-/* Фаза 2: появление — символы поднимаются на место */
-const newChars=cycleLine.querySelectorAll('.ch');
-newChars.forEach((ch,i)=>{
-ch.style.transition=`transform 0.58s cubic-bezier(.2,.85,.25,1) ${i*0.03}s, opacity 0.52s ease ${i*0.03}s`;
+buildCycleChars(CYCLE_WORDS[cycleIdx]);
+void cycleLine.offsetHeight; /* reflow */
+/* появление: новые символы поднимаются снизу */
+cycleLine.querySelectorAll('.ch').forEach((ch,i)=>{
+ch.style.transition=`transform .58s cubic-bezier(.2,.85,.25,1) ${i*.03}s,opacity .52s ease ${i*.03}s`;
 ch.style.transform='translateY(0)';
 ch.style.opacity='1';
 });
-},exitMs);
+},420+chars.length*22+100);
 }
-
-/* Запуск цикла после начальной анимации (не для reduced-motion) */
-if(!reduced){
-setTimeout(()=>setInterval(cycleText,4200),4800);
-}
+if(!reduced)setTimeout(()=>setInterval(cycleText,4200),4800);
 
 /* =========================================================
 2. Меню
@@ -551,7 +505,8 @@ function applyView(){
 heroLayer.classList.toggle('off',idx!==0);
 const on=idx>=1&&idx<=3;
 stmtLayer.classList.toggle('on',on);
-stmtLayer.classList.toggle('left',idx===1);
+/* ИЗМЕНЕНО: единое выравнивание слева для всех экранов 2–4 */
+stmtLayer.classList.toggle('left',on);
 if(on){
 const s=idx-1;
 if(s!==curStep){
@@ -656,7 +611,7 @@ if(en.isIntersecting){vid.play().catch(()=>{});}else{vid.pause();}
 }
 
 /* =========================================================
-7. 3D-сцена — ИСПРАВЛЕНО: рендерер использует размеры #stage
+7. 3D-сцена
 ========================================================= */
 async function init3D(){
 const THREE=await import('three');
@@ -668,12 +623,14 @@ const {UnrealBloomPass}=await import('three/addons/postprocessing/UnrealBloomPas
 const {OutputPass}=await import('three/addons/postprocessing/OutputPass.js');
 const PAPER=0xe9e8e3;
 
-/* --- НОВОЕ: функция получения размеров контейнера сцены --- */
+/* ИЗМЕНЕНО: рендерер занимает ровно #stage
+(на десктопе весь экран, на смартфоне — нижние 56vh) */
 const stageEl=$('#stage');
-function stW(){return stageEl.clientWidth||innerWidth;}
-function stH(){return stageEl.clientHeight||innerHeight;}
+const stW=()=>stageEl.clientWidth||innerWidth;
+const stH=()=>stageEl.clientHeight||innerHeight;
 
-const renderer=new THREE.WebGLRenderer({antialias:true});
+/* preserveDrawingBuffer нужен, чтобы читать пиксели кадра для фона */
+const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));
 renderer.setSize(stW(),stH());
 renderer.outputColorSpace=THREE.SRGBColorSpace;
@@ -695,6 +652,28 @@ const bloom=new UnrealBloomPass(
 new THREE.Vector2(stW(),stH()),.26,.55,.82);
 composer.addPass(bloom);
 composer.addPass(new OutputPass());
+
+/* ---- НОВОЕ: бесшовная подложка ----
+Раз в ~110 мс усредняем верхнюю полосу кадра в 1 пиксель
+и плавно красим в него --scene-bg (фон страницы и шапку).
+При смене камер цвет подложки «доезжает» до нового цвета сцены. */
+const smp=document.createElement('canvas');smp.width=1;smp.height=1;
+const smpCtx=smp.getContext('2d',{willReadFrequently:true});
+const bgT={r:218,g:218,b:218};   // цель (сэмпл из кадра)
+const bgC={r:218,g:218,b:218};   // текущее сглаженное значение
+let lastSmp=0,lastCss='';
+function sampleTop(){
+const cv=renderer.domElement;
+if(cv.width<4||cv.height<4)return;
+const strip=Math.max(2,Math.round(cv.height*.015));
+try{
+smpCtx.clearRect(0,0,1,1);
+/* верхняя полоса во всю ширину → усредняется в 1×1 */
+smpCtx.drawImage(cv,0,0,cv.width,strip,0,0,1,1);
+const d=smpCtx.getImageData(0,0,1,1).data;
+if(d[3]>0){bgT.r=d[0];bgT.g=d[1];bgT.b=d[2];}
+}catch(e){}
+}
 
 let center=new THREE.Vector3(),radius=6,fb=null;
 const cams=[];
@@ -739,9 +718,8 @@ return {knot,inst,ring};
 
 function defaultCams(){
 const defs=[[0,.18,1.0,'Camera1'],[1.05,.42,1.15,'Camera2'],[-0.95,.16,1.05,'Camera3'],[2.8,.9,1.3,'Camera4']];
-const asp=stW()/stH();
 defs.forEach(([az,el,dd,name])=>{
-const c=new THREE.PerspectiveCamera(40,asp,.1,radius*25);
+const c=new THREE.PerspectiveCamera(40,stW()/stH(),.1,radius*25);
 c.position.set(
 center.x+Math.sin(az)*Math.cos(el)*radius*dd*1.6,
 center.y+Math.sin(el)*radius*dd*1.6+.4,
@@ -761,12 +739,10 @@ scene.add(glb.scene);
 const box=new THREE.Box3().setFromObject(glb.scene);
 box.getCenter(center);
 radius=Math.max(.001,box.getSize(new THREE.Vector3()).length()/2);
-const asp=stW()/stH();
 glb.scene.traverse(o=>{
 if(o.isCamera){
-/* Обновляем aspect для камер из GLB */
-o.aspect=asp;
-o.updateProjectionMatrix();
+/* подгоняем аспект камер из GLB под текущий контейнер */
+o.aspect=stW()/stH();o.updateProjectionMatrix();
 cams.push(o);
 const u=o.userData||{};
 if(u.dof===true||u.dof===1||u.dof==='true')dofSet.add(o.name.toLowerCase());
@@ -838,18 +814,22 @@ fb.knot.rotation.y+=dt*.14;fb.knot.rotation.x+=dt*.045;
 fb.ring.rotation.z+=dt*.05;fb.inst.rotation.y-=dt*.02;
 }
 composer.render();
+
+/* НОВОЕ: сэмпл верхнего края кадра → плавное перекрашивание подложки */
+if(t-lastSmp>110){lastSmp=t;sampleTop();}
+const kb=reduced?1:1-Math.exp(-dt*4);
+bgC.r+=(bgT.r-bgC.r)*kb;bgC.g+=(bgT.g-bgC.g)*kb;bgC.b+=(bgT.b-bgC.b)*kb;
+const css=`rgb(${Math.round(bgC.r)},${Math.round(bgC.g)},${Math.round(bgC.b)})`;
+if(css!==lastCss){lastCss=css;document.documentElement.style.setProperty('--scene-bg',css);}
 });
 setCam(Math.min(idx,3));
 
-/* --- ИСПРАВЛЕНО: resize использует размеры #stage --- */
 addEventListener('resize',()=>{
-const w=stW(), h=stH();
-cam.aspect=w/h;cam.updateProjectionMatrix();
-renderer.setSize(w,h);
-composer.setSize(w,h);
+cam.aspect=stW()/stH();cam.updateProjectionMatrix();
+renderer.setSize(stW(),stH());
+composer.setSize(stW(),stH());
 bokeh.materialBokeh.uniforms['aspect'].value=cam.aspect;
-/* Обновляем aspect для всех камер */
-cams.forEach(c=>{c.aspect=w/h;c.updateProjectionMatrix();});
+cams.forEach(c=>{if(c.isPerspectiveCamera){c.aspect=stW()/stH();c.updateProjectionMatrix();}});
 sliderGo();
 });
 }

@@ -116,9 +116,9 @@ body.ready .h1 .ch{transform:none}
 .cue i::after{content:'';position:absolute;left:0;top:-40%;width:100%;height:40%;background:var(--ink);animation:cue 1.8s cubic-bezier(.6,0,.4,1) infinite}
 @keyframes cue{to{top:110%}}
 /* ---------- экраны 2–4 ----------
-   ДЕСКТОП: экраны 3–4 по центру, экран 2 слева (.left),
-   у всех — верхний отступ, чтобы текст не заходил под шапку.
-   СМАРТФОН: все три экрана слева (см. медиазапрос 760px). */
+ДЕСКТОП: экраны 3–4 по центру, экран 2 слева (.left),
+у всех — верхний отступ, чтобы текст не заходил под шапку.
+СМАРТФОН: все три экрана слева (см. медиазапрос 760px). */
 #stmtLayer{display:flex;align-items:center;justify-content:center;text-align:center;
 padding:11vh 24px 7vh;
 opacity:0;transform:translateY(26px);pointer-events:none;touch-action:none}
@@ -139,7 +139,7 @@ filter:blur(46px);}
 .txt{font-size:clamp(1.05rem,1.7vw,1.35rem);line-height:1.6;font-weight:430;max-width:44ch;margin:0 auto}
 #stmtInner .btn{margin-top:2.4rem}
 /* экран 5 — коллекция */
-#colLayer{background:var(--paper);border-top:1.5px solid var(--ink);transform:translateY(103%);overflow-y:auto;touch-action:pan-y;padding:9vh 34px 6vh;transition:transform .75s cubic-bezier(.65,.05,.25,1)}
+#colLayer{background:var(--paper);border-top:1.5px solid var(--ink);transform:translateY(103%);overflow-y:auto;overflow-x:hidden;touch-action:pan-y;padding:9vh 34px 6vh;transition:transform .75s cubic-bezier(.65,.05,.25,1)}
 #colLayer.on{transform:none}
 .col-head{display:flex;justify-content:space-between;align-items:flex-end;gap:2rem;margin-bottom:3rem;flex-wrap:wrap}
 .col-title{font-family:var(--display);font-weight:230;text-transform:uppercase;letter-spacing:-.03em;font-size:clamp(1.9rem,4.4vw,3.6rem);line-height:1}
@@ -175,9 +175,31 @@ filter:blur(46px);}
 /* ---------- футер с огромной надписью ---------- */
 .big-foot{margin-top:5rem;padding-top:1.6rem;border-top:1px solid var(--line)}
 .bf-meta{display:flex;justify-content:space-between;gap:1rem;font-size:.66rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--mut);flex-wrap:wrap;margin-bottom:2.4rem}
-.bf-word{font-family:var(--display);font-weight:230;line-height:.78;letter-spacing:-.045em;text-transform:uppercase;white-space:nowrap;user-select:none;
-font-size:clamp(4rem,47vw,38rem);color:transparent;-webkit-text-stroke:2px var(--ink);
-transition:color .6s ease;padding-bottom:.06em}
+.bf-word{
+font-family:var(--display);
+font-weight:230;
+line-height:.78;
+letter-spacing:-.045em;
+text-transform:uppercase;
+white-space:nowrap;
+user-select:none;
+/* fallback, если JS вдруг выключен */
+font-size:clamp(4rem,47vw,38rem);
+color:transparent;
+-webkit-text-stroke:2px var(--ink);
+transition:color .6s ease;
+padding-bottom:.06em;
+width:100%;
+}
+.bf-fit{
+display:inline-block;
+white-space:nowrap;
+width:max-content;
+max-width:none;
+color:inherit;
+-webkit-text-stroke:2px var(--ink);
+transition:color .6s ease;
+}
 .bf-word sup{font-size:.18em;-webkit-text-stroke:0;color:var(--accent)}
 .bf-word:hover{color:var(--ink)}
 @supports not (-webkit-text-stroke:1px #000){.bf-word{color:var(--ink)}}
@@ -211,7 +233,6 @@ font-size:.9rem;font-weight:600;mix-blend-mode:difference;transition:background 
 .ld-status{font-size:.62rem;font-weight:600;letter-spacing:.26em;text-transform:uppercase;color:var(--mut)}
 @media (max-width:1150px){.card{flex-basis:calc((100% - 24px)/2)}}
 @media (max-width:1000px){.hero-side{display:none}}
-
 /* ---------- смартфон: текст сверху, 3D снизу, бесшовный фон ---------- */
 @media (max-width:760px){
 .nav{display:none}
@@ -302,7 +323,7 @@ background:linear-gradient(to bottom, rgb(var(--scene-bg)) 0%, rgba(var(--scene-
 <!-- ЭКРАН 5 — слайдер -->
 <section class="layer" id="colLayer" aria-label="Коллекция">
 <div class="col-head rv">
-<h2 class="col-title">Коллекция №1<small>осень — зима ’26 · 9 предметов</small></h2>
+<h2 class="col-title">Коллекция №1<small>осень — зима '26 · 9 предметов</small></h2>
 <div class="col-nav">
 <button class="arr" id="prev" aria-label="Назад">←</button>
 <span class="count" id="count">01–04 / 09</span>
@@ -319,7 +340,7 @@ background:linear-gradient(to bottom, rgb(var(--scene-bg)) 0%, rgba(var(--scene-
 <span>сделано вне сезона</span>
 <span>telegram</span>
 </div>
-<div class="bf-word" aria-hidden="true">DAGOLF<sup>®</sup></div>
+<div class="bf-word" aria-hidden="true"><span class="bf-fit">DAGOLF<sup>®</sup></span></div>
 </footer>
 </section>
 <!-- ЭКРАН 6 — видео -->
@@ -353,7 +374,6 @@ background:linear-gradient(to bottom, rgb(var(--scene-bg)) 0%, rgba(var(--scene-
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const lerp=(a,b,t)=>a+(b-a)*t, clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-
 /* =========================================================
 1. Типографика героя + циклическая смена второй строки
 ========================================================= */
@@ -368,7 +388,6 @@ line.appendChild(s);
 });
 requestAnimationFrame(()=>document.body.classList.add('ready'));
 setTimeout(()=>$$('.hero-meta,.hero-right').forEach(el=>el.classList.add('in')),400);
-
 /* --- цикл слов: «для гольфа» → «для жизни» → «для вас» … --- */
 const CYCLE_WORDS=['для гольфа','для жизни','для вас','для стиля','для побед'];
 const cycleLine=$$('#heroTitle .line')[1];
@@ -405,7 +424,6 @@ ch.style.opacity='1';
 },420+chars.length*22+100);
 }
 if(!reduced)setTimeout(()=>setInterval(cycleText,4200),4800);
-
 /* =========================================================
 2. Меню
 ========================================================= */
@@ -415,7 +433,6 @@ const open=document.body.classList.toggle('menu-open');
 burger.setAttribute('aria-expanded',open);
 });
 const closeMenu=()=>{document.body.classList.remove('menu-open');burger.setAttribute('aria-expanded','false');};
-
 /* =========================================================
 3. Товары
 ========================================================= */
@@ -430,7 +447,6 @@ const PRODUCTS=[
 {code:'h', name:'Кепка D08',   price:'6 400 ₽',  desc:'твил'},
 {code:'i', name:'Поло D09',    price:'13 700 ₽', desc:'пике'},
 ];
-
 /* =========================================================
 4. Слайдер
 ========================================================= */
@@ -492,7 +508,6 @@ cart++;$$('.cartN').forEach(b=>b.textContent=cart);
 showToast(`<b>${PRODUCTS[i].name}</b> · размер ${sel.dataset.s} — в корзине`);
 }
 });
-
 /* =========================================================
 5. Поэкранная навигация: один жест = один экран (0–5)
 ========================================================= */
@@ -596,7 +611,75 @@ const g=e.target.closest('[data-go]');
 if(g){e.preventDefault();go(+g.dataset.go);}
 });
 applyView();
+/* =========================================================
+5.5. Автофит большой надписи в футере по доступной ширине
+========================================================= */
+const bfWord = $('.bf-word');
+const bfFit = $('.bf-fit');
 
+if (bfWord && bfFit) {
+  let bfLastWidth = 0;
+  let bfRaf = 0;
+
+  const fitBigFoot = (force = false) => {
+    const avail = bfWord.getBoundingClientRect().width;
+
+    if (!avail) return;
+
+    if (!force && bfLastWidth && Math.abs(avail - bfLastWidth) < 0.5) {
+      return;
+    }
+
+    const currentWidth = bfFit.getBoundingClientRect().width;
+
+    if (!currentWidth) return;
+
+    // Если уже почти вписались — лишний раз не дёргаем размер
+    if (bfWord.style.fontSize && Math.abs(avail - currentWidth) <= 0.6) {
+      bfLastWidth = avail;
+      return;
+    }
+
+    const currentSize = parseFloat(getComputedStyle(bfWord).fontSize);
+
+    if (!currentSize) return;
+
+    const nextSize = currentSize * (avail / currentWidth);
+
+    bfWord.style.fontSize = nextSize.toFixed(3) + 'px';
+    bfLastWidth = avail;
+  };
+
+  const scheduleFit = (force = false) => {
+    cancelAnimationFrame(bfRaf);
+    bfRaf = requestAnimationFrame(() => fitBigFoot(force));
+  };
+
+  // Первый расчёт
+  scheduleFit(true);
+
+  // Ресайз окна
+  addEventListener('resize', () => scheduleFit(true));
+
+  // Полная загрузка страницы
+  addEventListener('load', () => scheduleFit(true));
+
+  // Когда догрузятся веб-шрифты — обязательно пересчитать
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => scheduleFit(true));
+  }
+
+  // Если ширина контейнера меняется по layout-причинам
+  if ('ResizeObserver' in window) {
+    new ResizeObserver(() => {
+      const w = bfWord.getBoundingClientRect().width;
+
+      if (w && (!bfLastWidth || Math.abs(w - bfLastWidth) > 0.5)) {
+        scheduleFit(true);
+      }
+    }).observe(bfWord);
+  }
+}
 /* =========================================================
 6. Видео-экран
 ========================================================= */
@@ -619,7 +702,6 @@ if(reduced)return;
 if(en.isIntersecting){vid.play().catch(()=>{});}else{vid.pause();}
 }),{threshold:.2}).observe(vid);
 }
-
 /* =========================================================
 7. 3D-сцена
 ========================================================= */
@@ -632,13 +714,11 @@ const {BokehPass}=await import('three/addons/postprocessing/BokehPass.js');
 const {UnrealBloomPass}=await import('three/addons/postprocessing/UnrealBloomPass.js');
 const {OutputPass}=await import('three/addons/postprocessing/OutputPass.js');
 const PAPER=0xe9e8e3;
-
 /* рендерер занимает ровно #stage
 (на десктопе весь экран, на смартфоне — нижние 56vh) */
 const stageEl=$('#stage');
 const stW=()=>stageEl.clientWidth||innerWidth;
 const stH=()=>stageEl.clientHeight||innerHeight;
-
 /* preserveDrawingBuffer нужен, чтобы читать пиксели кадра для плашки */
 const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));
@@ -647,13 +727,10 @@ renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure=1.12;
 stageEl.appendChild(renderer.domElement);
-
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(PAPER);
 scene.fog=new THREE.Fog(PAPER,9,30);
-
 const cam=new THREE.PerspectiveCamera(42,stW()/stH(),0.05,300);
-
 const composer=new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene,cam));
 const bokeh=new BokehPass(scene,cam,{focus:8,aperture:0,maxblur:0});
@@ -662,7 +739,6 @@ const bloom=new UnrealBloomPass(
 new THREE.Vector2(stW(),stH()),.26,.55,.82);
 composer.addPass(bloom);
 composer.addPass(new OutputPass());
-
 /* ---- бесшовная плашка ----
 Сэмплируем верх кадра; берём только яркость (оттенок игнорируется —
 коричневые объекты не попадают в плашку) и зажимаем результат
@@ -687,11 +763,9 @@ bgT.r=v;bgT.g=v;bgT.b=v;
 }
 }catch(e){}
 }
-
 let center=new THREE.Vector3(),radius=6,fb=null;
 const cams=[];
 const dofSet=new Set(['camera3','camera4']);
-
 function setupLights(){
 scene.add(new THREE.HemisphereLight(0xffffff,0xc9c7bf,1.2));
 const lamp=(color,i,dx,dy,dz)=>{
@@ -706,7 +780,6 @@ lamp(0xffffff,2.6, 1.4,1.8, 1.2);
 lamp(0xf1f3f8,1.1,-1.6, .6,  .9);
 lamp(0xffffff,2.0, -.5,1.4,-1.6);
 }
-
 function buildFallback(){
 const g=new THREE.Group();
 const knot=new THREE.Mesh(
@@ -728,7 +801,6 @@ inst.setMatrixAt(i,d.matrix);
 g.add(inst);scene.add(g);
 return {knot,inst,ring};
 }
-
 function defaultCams(){
 const defs=[[0,.18,1.0,'Camera1'],[1.05,.42,1.15,'Camera2'],[-0.95,.16,1.05,'Camera3'],[2.8,.9,1.3,'Camera4']];
 defs.forEach(([az,el,dd,name])=>{
@@ -740,9 +812,7 @@ center.z+Math.cos(az)*Math.cos(el)*radius*dd*1.6);
 c.lookAt(center);c.name=name;cams.push(c);
 });
 }
-
 function fitFog(){scene.fog.near=radius*1.7;scene.fog.far=radius*7;}
-
 $('#ldStatus').textContent='загрузка сцены…';
 const glb=await new Promise(res=>{
 new GLTFLoader().load('dagolf_scene.glb',res,undefined,()=>res(null));
@@ -774,7 +844,6 @@ $('#ldStatus').textContent='GLB не найден — временная сце�
 fitFog();
 setupLights();
 if(cams.length<4)console.warn('Найдено камер:',cams.length,'— недостающие дополнены дефолтными');
-
 const state={pos:new THREE.Vector3(),quat:new THREE.Quaternion(),fov:42};
 const tgt  ={pos:new THREE.Vector3(),quat:new THREE.Quaternion(),fov:42,dof:0,focus:8};
 let dofAmt=0,focus=8;
@@ -793,13 +862,11 @@ tgt.dof=dofSet.has((c.name||'').toLowerCase())?1:0;
 };
 setCam(0);
 state.pos.copy(tgt.pos);state.quat.copy(tgt.quat);state.fov=tgt.fov;
-
 const mouse={x:0,y:0,tx:0,ty:0};
 if(!reduced)addEventListener('pointermove',e=>{
 mouse.tx=(e.clientX/innerWidth-.5)*2;
 mouse.ty=(e.clientY/innerHeight-.5)*2;
 },{passive:true});
-
 let prevT=performance.now();
 renderer.setAnimationLoop(t=>{
 const dt=Math.min(.05,(t-prevT)/1000);prevT=t;
@@ -830,7 +897,6 @@ fb.knot.rotation.y+=dt*.14;fb.knot.rotation.x+=dt*.045;
 fb.ring.rotation.z+=dt*.05;fb.inst.rotation.y-=dt*.02;
 }
 composer.render();
-
 /* сэмпл верхнего края кадра → плавное перекрашивание плашки и фейда */
 if(t-lastSmp>110){lastSmp=t;sampleTop();}
 const kb=reduced?1:1-Math.exp(-dt*4);
@@ -839,7 +905,6 @@ const css=`${Math.round(bgC.r)},${Math.round(bgC.g)},${Math.round(bgC.b)}`;
 if(css!==lastCss){lastCss=css;document.documentElement.style.setProperty('--scene-bg',css);}
 });
 setCam(Math.min(idx,3));
-
 addEventListener('resize',()=>{
 cam.aspect=stW()/stH();cam.updateProjectionMatrix();
 renderer.setSize(stW(),stH());
@@ -853,7 +918,6 @@ init3D().catch(e=>{
 console.warn('3D недоступен:',e);
 $('#ldStatus').textContent='ошибка 3d — работаем без сцены';
 });
-
 /* прелоадер */
 const hideLoader=()=>$('#loader').classList.add('done');
 addEventListener('load',()=>setTimeout(hideLoader,600));

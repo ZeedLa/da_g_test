@@ -196,23 +196,59 @@ font-size:.9rem;font-weight:600;mix-blend-mode:difference;transition:background 
 .ld-bar i{display:block;height:100%;width:40%;background:var(--ink);animation:ld 1.1s cubic-bezier(.5,0,.5,1) infinite}
 @keyframes ld{0%{transform:translateX(-110%)}100%{transform:translateX(300%)}}
 .ld-status{font-size:.62rem;font-weight:600;letter-spacing:.26em;text-transform:uppercase;color:var(--mut)}
+
+/* ═══════════════════════════════════════════
+   НОВОЕ: will-change для анимации цикла
+   ═══════════════════════════════════════════ */
+.h1 .line-cycle .ch{will-change:transform,opacity}
+
 @media (max-width:1150px){.card{flex-basis:calc((100% - 24px)/2)}}
 @media (max-width:1000px){.hero-side{display:none}}
+
+/* ═══════════════════════════════════════════
+   МОБИЛЬНАЯ РАСКЛАДКА: текст сверху, 3D снизу
+   ═══════════════════════════════════════════ */
 @media (max-width:760px){
 .nav{display:none}
 .burger{display:flex;top:14px;right:12px}
 .topbar{padding:18px 20px}
 body.scrolled .topbar{padding:9px 16px}
 body.scrolled .logo img{height:20px}
-#heroLayer{padding:0 20px 5vh}
-.hero-bottom{flex-direction:column;align-items:flex-start;gap:2.4rem}
+
+/* 3D-сцена занимает нижнюю часть экрана */
+#stage{top:44vh}
+#stage::before{
+content:'';position:absolute;top:0;left:0;right:0;height:90px;
+background:linear-gradient(to bottom,var(--paper) 0%,rgba(218,218,218,.6) 50%,transparent 100%);
+z-index:2;pointer-events:none;transform:translateY(-100%);
+}
+
+/* Герой: текст в верхней части */
+#heroLayer{
+justify-content:flex-start;
+padding:14vh 20px 0;
+}
+.h1{font-size:clamp(2.4rem,10vw,5rem)}
+.hero-bottom{flex-direction:column;align-items:flex-start;gap:2rem}
 .hero-right{align-items:flex-start}
-#colLayer{padding:8vh 20px 5vh}
-.veil{padding:2rem 1.2rem}
+.hero-meta{margin-bottom:.8rem}
+.cue{display:none}
+
+/* Экраны 2-4: текст в верхней части */
+#stmtLayer{
+align-items:flex-start;
+padding-top:12vh;
+padding-bottom:56vh;
+}
 #stmtLayer.left{padding-left:20px}
+.veil{padding:2rem 1.2rem}
+
+/* Коллекция и видео */
+#colLayer{padding:8vh 20px 5vh}
 .vid-cap{left:20px;bottom:86px}
 .vid-ctl{right:20px;bottom:20px}
 }
+
 @media (max-width:640px){.card{flex-basis:100%}}
 @media (hover:none){
 .card-buy{transform:none;position:static;border:1px solid var(--line);border-top-width:0}
@@ -239,7 +275,6 @@ body.scrolled .logo img{height:20px}
 <a class="nl" href="#" data-go="4"><sup>05</sup><span>Корзина&thinsp;·&thinsp;<b class="cartN">0</b></span></a>
 </nav>
 </header>
-<!-- ИЗМЕНЕНО: бургер вынесен из шапки, чтобы всегда быть кликабельным поверх меню -->
 <button class="burger" id="burger" aria-label="Меню" aria-expanded="false"><i></i><i></i><i></i></button>
 <nav class="mmenu" id="mmenu" aria-label="Мобильное меню">
 <a href="#" data-go="1"><sup>01</sup>Каталог</a>
@@ -274,7 +309,7 @@ body.scrolled .logo img{height:20px}
 <!-- ЭКРАН 5 — слайдер -->
 <section class="layer" id="colLayer" aria-label="Коллекция">
 <div class="col-head rv">
-<h2 class="col-title">Коллекция №1<small>осень — зима ’26 · 9 предметов</small></h2>
+<h2 class="col-title">Коллекция №1<small>осень — зима '26 · 9 предметов</small></h2>
 <div class="col-nav">
 <button class="arr" id="prev" aria-label="Назад">←</button>
 <span class="count" id="count">01–04 / 09</span>
@@ -285,7 +320,6 @@ body.scrolled .logo img{height:20px}
 <div class="track" id="track"></div>
 </div>
 <p class="col-note rv" style="--d:.3s"><b>✳</b> наведите на вещь — вид сзади, размеры и корзина</p>
-<!-- НОВОЕ: футер с огромной надписью -->
 <footer class="big-foot rv" style="--d:.4s">
 <div class="bf-meta">
 <span>© DAGOLF, 2026</span>
@@ -326,10 +360,12 @@ body.scrolled .logo img{height:20px}
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const lerp=(a,b,t)=>a+(b-a)*t, clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
 /* =========================================================
-1. Типографика героя
+1. Типографика героя + ЦИКЛИЧЕСКАЯ СМЕНА ТЕКСТА
 ========================================================= */
-$$('#heroTitle .line').forEach(line=>{
+const heroLines=$$('#heroTitle .line');
+heroLines.forEach(line=>{
 const txt=line.textContent; line.textContent='';
 [...txt].forEach((c,i)=>{
 const s=document.createElement('span');
@@ -340,6 +376,72 @@ line.appendChild(s);
 });
 requestAnimationFrame(()=>document.body.classList.add('ready'));
 setTimeout(()=>$$('.hero-meta,.hero-right').forEach(el=>el.classList.add('in')),400);
+
+/* --- Циклическая анимация второй строки --- */
+const CYCLE_WORDS=['для гольфа','для жизни','для вас','для стиля','для побед'];
+const cycleLine=heroLines[1];
+let cycleIdx=0;
+
+/* Помечаем вторую строку для will-change */
+cycleLine.classList.add('line-cycle');
+
+function buildCycleChars(text, startHidden){
+cycleLine.innerHTML='';
+[...text].forEach((c,i)=>{
+const s=document.createElement('span');
+s.className='ch';
+s.textContent=c===' ' ? '\u00A0' : c;
+if(startHidden){
+s.style.transition='none';
+s.style.transform='translateY(115%)';
+s.style.opacity='0';
+} else {
+s.style.transform='translateY(0)';
+s.style.opacity='1';
+}
+cycleLine.appendChild(s);
+});
+}
+
+function cycleText(){
+/* Анимируем только когда герой виден */
+if(typeof idx!=='undefined' && idx!==0) return;
+
+const chars=cycleLine.querySelectorAll('.ch');
+if(!chars.length) return;
+
+/* Фаза 1: уход — символы уходят вверх */
+chars.forEach((ch,i)=>{
+ch.style.transition=`transform 0.42s cubic-bezier(.55,0,.1,1) ${i*0.022}s, opacity 0.38s ease ${i*0.022}s`;
+ch.style.transform='translateY(-115%)';
+ch.style.opacity='0';
+});
+
+const exitMs=420+chars.length*22+100;
+
+setTimeout(()=>{
+cycleIdx=(cycleIdx+1)%CYCLE_WORDS.length;
+/* Создаём новые символы внизу (скрытые) */
+buildCycleChars(CYCLE_WORDS[cycleIdx],true);
+
+/* Принудительный reflow */
+void cycleLine.offsetHeight;
+
+/* Фаза 2: появление — символы поднимаются на место */
+const newChars=cycleLine.querySelectorAll('.ch');
+newChars.forEach((ch,i)=>{
+ch.style.transition=`transform 0.58s cubic-bezier(.2,.85,.25,1) ${i*0.03}s, opacity 0.52s ease ${i*0.03}s`;
+ch.style.transform='translateY(0)';
+ch.style.opacity='1';
+});
+},exitMs);
+}
+
+/* Запуск цикла после начальной анимации (не для reduced-motion) */
+if(!reduced){
+setTimeout(()=>setInterval(cycleText,4200),4800);
+}
+
 /* =========================================================
 2. Меню
 ========================================================= */
@@ -349,6 +451,7 @@ const open=document.body.classList.toggle('menu-open');
 burger.setAttribute('aria-expanded',open);
 });
 const closeMenu=()=>{document.body.classList.remove('menu-open');burger.setAttribute('aria-expanded','false');};
+
 /* =========================================================
 3. Товары
 ========================================================= */
@@ -363,6 +466,7 @@ const PRODUCTS=[
 {code:'h', name:'Кепка D08',   price:'6 400 ₽',  desc:'твил'},
 {code:'i', name:'Поло D09',    price:'13 700 ₽', desc:'пике'},
 ];
+
 /* =========================================================
 4. Слайдер
 ========================================================= */
@@ -424,6 +528,7 @@ cart++;$$('.cartN').forEach(b=>b.textContent=cart);
 showToast(`<b>${PRODUCTS[i].name}</b> · размер ${sel.dataset.s} — в корзине`);
 }
 });
+
 /* =========================================================
 5. Поэкранная навигация: один жест = один экран (0–5)
 ========================================================= */
@@ -464,7 +569,6 @@ stmtWasOn=on;
 colLayer.classList.toggle('on',idx===4);
 if(idx===4&&!colSeen){colSeen=true;colLayer.classList.add('in');sliderGo();}
 vidLayer.classList.toggle('on',idx===5);
-/* НОВОЕ: после первого экрана шапка становится узкой чёрной */
 document.body.classList.toggle('scrolled',idx>0);
 setCam(Math.min(idx,3));
 }
@@ -474,12 +578,11 @@ if(n===idx||locked)return;
 locked=true;setTimeout(()=>locked=false,reduced?120:1050);
 idx=n;applyView();closeMenu();
 }
-/* колесо: порог + блокировка → один «крут» = один экран */
+/* колесо */
 let acc=0,lastWheel=0;
 addEventListener('wheel',e=>{
 if(document.body.classList.contains('menu-open')){e.preventDefault();return;}
 if(idx===4){
-/* ИЗМЕНЕНО: допуск границы увеличен — переход к видео срабатывает мягче */
 const canDown=colLayer.scrollTop+colLayer.clientHeight<colLayer.scrollHeight-8;
 const canUp=colLayer.scrollTop>4;
 if(e.deltaY>0&&canDown)return;
@@ -497,8 +600,7 @@ lastWheel=now;
 acc+=e.deltaY;
 if(Math.abs(acc)>70){const dir=acc>0?1:-1;acc=0;go(idx+dir);}
 },{passive:false});
-/* свайпы — ИЗМЕНЕНО: на экране коллекции экран меняется у краёв,
-иначе на смартфоне со слайдера нельзя было уйти на видео */
+/* свайпы */
 let tY=null,tX=null;
 addEventListener('touchstart',e=>{tY=e.touches[0].clientY;tX=e.touches[0].clientX;},{passive:true});
 addEventListener('touchend',e=>{
@@ -509,8 +611,8 @@ if(Math.abs(dy)>60&&Math.abs(dy)>Math.abs(dx)){
 if(idx===4&&e.target.closest('#colLayer')){
 const atBottom=colLayer.scrollTop+colLayer.clientHeight>=colLayer.scrollHeight-24;
 const atTop=colLayer.scrollTop<=4;
-if(dy>0&&!atBottom)return; /* листаем коллекцию вниз — не мешаем */
-if(dy<0&&!atTop)return;    /* листаем коллекцию вверх — не мешаем */
+if(dy>0&&!atBottom)return;
+if(dy<0&&!atTop)return;
 }
 if(idx===5&&e.target.closest('#vidLayer')&&vidLayer.scrollHeight>vidLayer.clientHeight+8)return;
 go(idx+(dy>0?1:-1));
@@ -529,6 +631,7 @@ const g=e.target.closest('[data-go]');
 if(g){e.preventDefault();go(+g.dataset.go);}
 });
 applyView();
+
 /* =========================================================
 6. Видео-экран
 ========================================================= */
@@ -551,8 +654,9 @@ if(reduced)return;
 if(en.isIntersecting){vid.play().catch(()=>{});}else{vid.pause();}
 }),{threshold:.2}).observe(vid);
 }
+
 /* =========================================================
-7. 3D-сцена
+7. 3D-сцена — ИСПРАВЛЕНО: рендерер использует размеры #stage
 ========================================================= */
 async function init3D(){
 const THREE=await import('three');
@@ -563,28 +667,39 @@ const {BokehPass}=await import('three/addons/postprocessing/BokehPass.js');
 const {UnrealBloomPass}=await import('three/addons/postprocessing/UnrealBloomPass.js');
 const {OutputPass}=await import('three/addons/postprocessing/OutputPass.js');
 const PAPER=0xe9e8e3;
+
+/* --- НОВОЕ: функция получения размеров контейнера сцены --- */
+const stageEl=$('#stage');
+function stW(){return stageEl.clientWidth||innerWidth;}
+function stH(){return stageEl.clientHeight||innerHeight;}
+
 const renderer=new THREE.WebGLRenderer({antialias:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));
-renderer.setSize(innerWidth,innerHeight);
+renderer.setSize(stW(),stH());
 renderer.outputColorSpace=THREE.SRGBColorSpace;
 renderer.toneMapping=THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure=1.12;
-$('#stage').appendChild(renderer.domElement);
+stageEl.appendChild(renderer.domElement);
+
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(PAPER);
 scene.fog=new THREE.Fog(PAPER,9,30);
-const cam=new THREE.PerspectiveCamera(42,innerWidth/innerHeight,0.05,300);
+
+const cam=new THREE.PerspectiveCamera(42,stW()/stH(),0.05,300);
+
 const composer=new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene,cam));
 const bokeh=new BokehPass(scene,cam,{focus:8,aperture:0,maxblur:0});
 composer.addPass(bokeh);
 const bloom=new UnrealBloomPass(
-new THREE.Vector2(innerWidth,innerHeight),.26,.55,.82);
+new THREE.Vector2(stW(),stH()),.26,.55,.82);
 composer.addPass(bloom);
 composer.addPass(new OutputPass());
+
 let center=new THREE.Vector3(),radius=6,fb=null;
 const cams=[];
 const dofSet=new Set(['camera3','camera4']);
+
 function setupLights(){
 scene.add(new THREE.HemisphereLight(0xffffff,0xc9c7bf,1.2));
 const lamp=(color,i,dx,dy,dz)=>{
@@ -599,6 +714,7 @@ lamp(0xffffff,2.6, 1.4,1.8, 1.2);
 lamp(0xf1f3f8,1.1,-1.6, .6,  .9);
 lamp(0xffffff,2.0, -.5,1.4,-1.6);
 }
+
 function buildFallback(){
 const g=new THREE.Group();
 const knot=new THREE.Mesh(
@@ -620,10 +736,12 @@ inst.setMatrixAt(i,d.matrix);
 g.add(inst);scene.add(g);
 return {knot,inst,ring};
 }
+
 function defaultCams(){
 const defs=[[0,.18,1.0,'Camera1'],[1.05,.42,1.15,'Camera2'],[-0.95,.16,1.05,'Camera3'],[2.8,.9,1.3,'Camera4']];
+const asp=stW()/stH();
 defs.forEach(([az,el,dd,name])=>{
-const c=new THREE.PerspectiveCamera(40,innerWidth/innerHeight,.1,radius*25);
+const c=new THREE.PerspectiveCamera(40,asp,.1,radius*25);
 c.position.set(
 center.x+Math.sin(az)*Math.cos(el)*radius*dd*1.6,
 center.y+Math.sin(el)*radius*dd*1.6+.4,
@@ -631,7 +749,9 @@ center.z+Math.cos(az)*Math.cos(el)*radius*dd*1.6);
 c.lookAt(center);c.name=name;cams.push(c);
 });
 }
+
 function fitFog(){scene.fog.near=radius*1.7;scene.fog.far=radius*7;}
+
 $('#ldStatus').textContent='загрузка сцены…';
 const glb=await new Promise(res=>{
 new GLTFLoader().load('dagolf_scene.glb',res,undefined,()=>res(null));
@@ -641,8 +761,13 @@ scene.add(glb.scene);
 const box=new THREE.Box3().setFromObject(glb.scene);
 box.getCenter(center);
 radius=Math.max(.001,box.getSize(new THREE.Vector3()).length()/2);
+const asp=stW()/stH();
 glb.scene.traverse(o=>{
-if(o.isCamera){cams.push(o);
+if(o.isCamera){
+/* Обновляем aspect для камер из GLB */
+o.aspect=asp;
+o.updateProjectionMatrix();
+cams.push(o);
 const u=o.userData||{};
 if(u.dof===true||u.dof===1||u.dof==='true')dofSet.add(o.name.toLowerCase());
 }
@@ -661,6 +786,7 @@ $('#ldStatus').textContent='GLB не найден — временная сце�
 fitFog();
 setupLights();
 if(cams.length<4)console.warn('Найдено камер:',cams.length,'— недостающие дополнены дефолтными');
+
 const state={pos:new THREE.Vector3(),quat:new THREE.Quaternion(),fov:42};
 const tgt  ={pos:new THREE.Vector3(),quat:new THREE.Quaternion(),fov:42,dof:0,focus:8};
 let dofAmt=0,focus=8;
@@ -675,11 +801,13 @@ tgt.dof=dofSet.has((c.name||'').toLowerCase())?1:0;
 };
 setCam(0);
 state.pos.copy(tgt.pos);state.quat.copy(tgt.quat);state.fov=tgt.fov;
+
 const mouse={x:0,y:0,tx:0,ty:0};
 if(!reduced)addEventListener('pointermove',e=>{
 mouse.tx=(e.clientX/innerWidth-.5)*2;
 mouse.ty=(e.clientY/innerHeight-.5)*2;
 },{passive:true});
+
 let prevT=performance.now();
 renderer.setAnimationLoop(t=>{
 const dt=Math.min(.05,(t-prevT)/1000);prevT=t;
@@ -712,11 +840,16 @@ fb.ring.rotation.z+=dt*.05;fb.inst.rotation.y-=dt*.02;
 composer.render();
 });
 setCam(Math.min(idx,3));
+
+/* --- ИСПРАВЛЕНО: resize использует размеры #stage --- */
 addEventListener('resize',()=>{
-cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();
-renderer.setSize(innerWidth,innerHeight);
-composer.setSize(innerWidth,innerHeight);
+const w=stW(), h=stH();
+cam.aspect=w/h;cam.updateProjectionMatrix();
+renderer.setSize(w,h);
+composer.setSize(w,h);
 bokeh.materialBokeh.uniforms['aspect'].value=cam.aspect;
+/* Обновляем aspect для всех камер */
+cams.forEach(c=>{c.aspect=w/h;c.updateProjectionMatrix();});
 sliderGo();
 });
 }
@@ -724,6 +857,7 @@ init3D().catch(e=>{
 console.warn('3D недоступен:',e);
 $('#ldStatus').textContent='ошибка 3d — работаем без сцены';
 });
+
 /* прелоадер */
 const hideLoader=()=>$('#loader').classList.add('done');
 addEventListener('load',()=>setTimeout(hideLoader,600));

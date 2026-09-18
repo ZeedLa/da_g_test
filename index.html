@@ -9,11 +9,15 @@
 DALOGO.svg        — логотип (верхний левый угол)
 asteriks.svg      — фирменный астериск (везде вместо глифа ✳, цвет зашит в сам файл)
 dagolf_scene.glb  — 3D-сцена, внутри камеры Camera1..Camera4
+static/           — запасные фоны смартфона на случай недогруза сцены:
+                    bg1.jpg…bg4.jpg — по одному на каждый из экранов 1–4
 Items/            — фото коллекции: 9 изделий × 2 вида
 item_a1/item_a2 … item_i1/item_i2.jpg (1 = фронт, 2 = вид при наведении)
 brandvideo.mp4    — фильм бренда (экран после коллекции)
 Шрифт: Inter. Для замены на cygre достаточно поменять --display.
 Навигация: один жест колеса / свайп / стрелки = один экран.
+Загрузка: десктоп ждёт 100% (повторы до успеха, заглушек нет);
+смартфон при недогрузе показывает статичные фоны вместо 3D.
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,6 +53,10 @@ img{display:block}
 /* ---------- сцена ---------- */
 #stage{position:fixed;inset:0;z-index:0;background:radial-gradient(120% 90% at 50% 40%,#f2f1ec 0%,var(--paper) 55%,#dcdad2 100%)}
 #stage canvas{display:block;width:100%;height:100%}
+/* смартфон без 3D: недогруженную сцену заменяют фоны static/bg1…bg4.jpg,
+по одному на каждый из первых четырёх экранов (переключаются в applyView) */
+body.static-bg #stage{background-color:var(--paper);background-size:cover;background-position:center;background-repeat:no-repeat}
+body.static-bg .cue{display:none}
 /* градиентный фейд плашки поверх 3D-сцены (виден только на смартфоне) */
 #edgeFade{display:none}
 .grain{position:fixed;inset:-50%;z-index:70;pointer-events:none;opacity:.05;mix-blend-mode:multiply;
@@ -342,11 +350,11 @@ background:linear-gradient(to bottom, rgb(var(--scene-bg)) 0%, rgba(var(--scene-
 <div class="slider rv" style="--d:.15s">
 <div class="track" id="track"></div>
 </div>
-<p class="col-note rv" style="--d:.3s"><img class="ast" src="asteriks.svg" alt="" aria-hidden="true" draggable="false"> наведите на вещь — альтернативный вид, размеры и корзина</p>
+<p class="col-note rv" style="--d:.3s"><img class="ast" src="asteriks.svg" alt="" aria-hidden="true" draggable="false"> наведите на вещь — вид сзади, размеры и корзина</p>
 <footer class="big-foot rv" style="--d:.4s">
 <div class="bf-meta">
 <span>© DAGOLF, 2026</span>
-<span></span>
+<span>сделано вне сезона</span>
 <span>telegram</span>
 </div>
 <div class="bf-word" aria-hidden="true"><span class="bf-fit">DAGOLF<sup>®</sup></span></div>
@@ -528,6 +536,7 @@ const STEPS=[
 const heroLayer=$('#heroLayer'),stmtLayer=$('#stmtLayer'),stmtInner=$('#stmtInner'),vidLayer=$('#vidLayer');
 let idx=0,locked=false,curStep=-1,stmtWasOn=false,colSeen=false;
 let setCam=()=>{};
+let staticUpd=()=>{}; /* в режиме статичных фонов подставляет фон текущего экрана */
 function renderStep(s){
 const d=STEPS[s];
 stmtInner.innerHTML=
@@ -560,6 +569,7 @@ if(idx===4&&!colSeen){colSeen=true;colLayer.classList.add('in');sliderGo();}
 vidLayer.classList.toggle('on',idx===5);
 document.body.classList.toggle('scrolled',idx>0);
 setCam(Math.min(idx,3));
+staticUpd();
 }
 function go(n){
 n=clamp(n,0,5);
@@ -694,15 +704,20 @@ if(en.isIntersecting){vid.play().catch(()=>{});}else{vid.pause();}
 }),{threshold:.2}).observe(vid);
 }
 /* =========================================================
-6.5. Прелоадер: честное состояние загрузки
-Прелоадер закрывается только когда сцена загружена (или не
-загрузилась — тогда показана светлая заглушка) и отрисован
-первый кадр. Пока грузится GLB — реальный прогресс.
+6.5. Прелоадер и политика загрузки
+ДЕСКТОП: только 100% — при обрыве повторяем попытки до успеха,
+заглушки не показываются никогда.
+СМАРТФОН: одна попытка; ошибка или 15 с без новых данных —
+вместо 3D на экраны 1–4 встают статичные фоны static/bg1…bg4.jpg.
 ========================================================= */
 const ldBar=$('#ldBar'),ldFill=$('#ldFill'),ldStatus=$('#ldStatus');
+const stageEl=$('#stage');
 const setLd=t=>{ldStatus.textContent=t;};
 const hideLoader=()=>$('#loader').classList.add('done');
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const bootAt=performance.now();
+const isMobile=matchMedia('(max-width:760px)').matches;
+
 function onGlbProgress(ev){
 if(ev.lengthComputable&&ev.total>0){
 /* сервер отдал размер файла — рисуем честные проценты */
@@ -715,12 +730,35 @@ setLd('загрузка сцены… '+Math.round(p*100)+'%');
 setLd('загрузка сцены… '+(ev.loaded/1048576).toFixed(1).replace('.',',')+' мб');
 }
 }
+/* одна попытка загрузки. На смартфоне: если 15 секунд не приходит
+ни байта — считаем это недогрузом (возвращаем null). Десктоп ждёт
+столько, сколько нужно: браузер сам оборвёт мёртвое соединение. */
+function loadGlb(GLTFLoader){
+return new Promise(res=>{
+let settled=false,idle=0;
+const done=v=>{if(!settled){settled=true;clearTimeout(idle);res(v);}};
+const arm=()=>{clearTimeout(idle);if(isMobile)idle=setTimeout(()=>done(null),15000);};
+arm();
+new GLTFLoader().load('dagolf_scene.glb',done,ev=>{arm();onGlbProgress(ev);},()=>done(null));
+});
+}
+/* статичные фоны вместо непрогрузившейся 3D-сцены (только смартфон) */
+function staticFallback(){
+document.body.classList.add('static-bg');
+staticUpd=()=>{stageEl.style.backgroundImage='url(static/bg'+(Math.min(idx,3)+1)+'.jpg)';};
+staticUpd();
+/* даём видимому фону шанс догрузиться до снятия прелоадера,
+остальные три подтягиваются в фоне */
+const cur='static/bg'+(Math.min(idx,3)+1)+'.jpg';
+const wait=new Promise(r=>{const im=new Image();im.onload=im.onerror=r;im.src=cur;});
+return Promise.race([wait,sleep(3000)]).then(()=>{
+for(let i=1;i<=4;i++){const im=new Image();im.src='static/bg'+i+'.jpg';}
+});
+}
 /* =========================================================
-7. 3D-сцена
+7. 3D-сцена (запускается только с полностью догруженным GLB)
 ========================================================= */
-async function init3D(){
-const THREE=await import('three');
-const {GLTFLoader}=await import('three/addons/loaders/GLTFLoader.js');
+async function initScene(THREE,gltf){
 const {EffectComposer}=await import('three/addons/postprocessing/EffectComposer.js');
 const {RenderPass}=await import('three/addons/postprocessing/RenderPass.js');
 const {BokehPass}=await import('three/addons/postprocessing/BokehPass.js');
@@ -729,7 +767,6 @@ const {OutputPass}=await import('three/addons/postprocessing/OutputPass.js');
 const PAPER=0xe9e8e3;
 /* рендерер занимает ровно #stage
 (на десктопе весь экран, на смартфоне — нижние 56vh) */
-const stageEl=$('#stage');
 const stW=()=>stageEl.clientWidth||innerWidth;
 const stH=()=>stageEl.clientHeight||innerHeight;
 /* preserveDrawingBuffer нужен, чтобы читать пиксели кадра для плашки */
@@ -776,7 +813,7 @@ bgT.r=v;bgT.g=v;bgT.b=v;
 }
 }catch(e){}
 }
-let center=new THREE.Vector3(),radius=6,fb=null;
+let center=new THREE.Vector3(),radius=6;
 const cams=[];
 const dofSet=new Set(['camera3','camera4']);
 function setupLights(){
@@ -793,32 +830,6 @@ lamp(0xffffff,2.6, 1.4,1.8, 1.2);
 lamp(0xf1f3f8,1.1,-1.6, .6,  .9);
 lamp(0xffffff,2.0, -.5,1.4,-1.6);
 }
-/* светлая спокойная заглушка на случай, если GLB не достался:
-матовая «слоновая кость», тонкое акцентное кольцо, лёгкие частицы */
-function buildFallback(){
-const g=new THREE.Group();
-const knot=new THREE.Mesh(
-new THREE.TorusKnotGeometry(1.55,.46,220,36),
-new THREE.MeshStandardMaterial({color:0xf4f2ea,roughness:.92,metalness:0}));
-g.add(knot);
-const ring=new THREE.Mesh(new THREE.TorusGeometry(3.1,.012,10,160),
-new THREE.MeshBasicMaterial({color:0x6290B6,transparent:true,opacity:.65}));
-ring.rotation.x=Math.PI/2.35;g.add(ring);
-const N=70,inst=new THREE.InstancedMesh(
-new THREE.IcosahedronGeometry(.05,0),
-new THREE.MeshStandardMaterial({color:0xffffff,roughness:.6}),N);
-const d=new THREE.Object3D();
-const cSoft=new THREE.Color(0xdcd9cf),cAcc=new THREE.Color(0x6290B6);
-for(let i=0;i<N;i++){
-const v=new THREE.Vector3().randomDirection().multiplyScalar(3.4+Math.random()*1.9);
-d.position.copy(v);d.scale.setScalar(.5+Math.random()*1.3);d.updateMatrix();
-inst.setMatrixAt(i,d.matrix);
-inst.setColorAt(i,Math.random()<.16?cAcc:cSoft);
-}
-if(inst.instanceColor)inst.instanceColor.needsUpdate=true;
-g.add(inst);scene.add(g);
-return {knot,inst,ring};
-}
 function defaultCams(){
 const defs=[[0,.18,1.0,'Camera1'],[1.05,.42,1.15,'Camera2'],[-0.95,.16,1.05,'Camera3'],[2.8,.9,1.3,'Camera4']];
 defs.forEach(([az,el,dd,name])=>{
@@ -831,20 +842,12 @@ c.lookAt(center);c.name=name;cams.push(c);
 });
 }
 function fitFog(){scene.fog.near=radius*1.7;scene.fog.far=radius*7;}
-/* ---------- загрузка GLB с реальным прогрессом ---------- */
-setLd('загрузка сцены…');
-let glbFailed=false;
-const glbLoad=new Promise(res=>{
-new GLTFLoader().load('dagolf_scene.glb',res,onGlbProgress,()=>{glbFailed=true;res(null);});
-});
-/* не ждём вечно: 25 с без ответа — уходим на светлую заглушку */
-const glb=await Promise.race([glbLoad,new Promise(res=>setTimeout(()=>res(null),25000))]);
-if(glb){
-scene.add(glb.scene);
-const box=new THREE.Box3().setFromObject(glb.scene);
+/* сцена уже догружена — добавляем и вычитываем камеры */
+scene.add(gltf.scene);
+const box=new THREE.Box3().setFromObject(gltf.scene);
 box.getCenter(center);
 radius=Math.max(.001,box.getSize(new THREE.Vector3()).length()/2);
-glb.scene.traverse(o=>{
+gltf.scene.traverse(o=>{
 if(o.isCamera){
 o.aspect=stW()/stH();o.updateProjectionMatrix();
 cams.push(o);
@@ -858,11 +861,6 @@ const nb=+((b.name.match(/(\d+)/)||[])[1]||99);
 return na-nb;
 });
 if(!cams.length)defaultCams();
-setLd('сцена загружена');
-}else{
-fb=buildFallback();defaultCams();
-setLd(glbFailed?'файл сцены не найден — лёгкая заглушка':'файл сцены не ответил — лёгкая заглушка');
-}
 fitFog();
 setupLights();
 if(cams.length<4)console.warn('Найдено камер:',cams.length,'— недостающие дополнены дефолтными');
@@ -914,10 +912,6 @@ bokeh.enabled=dofAmt>.004;
 bokeh.uniforms.focus.value=focus;
 bokeh.uniforms.aperture.value=.0028*dofAmt;
 bokeh.uniforms.maxblur.value=.011*dofAmt;
-if(fb&&!reduced){
-fb.knot.rotation.y+=dt*.14;fb.knot.rotation.x+=dt*.045;
-fb.ring.rotation.z+=dt*.05;fb.inst.rotation.y-=dt*.02;
-}
 composer.render();
 /* сэмпл верхнего края кадра → плавное перекрашивание плашки и фейда */
 if(t-lastSmp>110){lastSmp=t;sampleTop();}
@@ -935,13 +929,46 @@ bokeh.materialBokeh.uniforms['aspect'].value=cam.aspect;
 cams.forEach(c=>{if(c.isPerspectiveCamera){c.aspect=stW()/stH();c.updateProjectionMatrix();}});
 sliderGo();
 });
-/* ---------- открываем страницу ----------
-Полоса на 100 %, дальше ждём первые отрисованные кадры и шрифты.
-Минимум 0,45 с прелоадер на экране, чтобы не мелькать. */
+}
+/* =========================================================
+8. Запуск
+========================================================= */
+async function boot(){
+setLd('загрузка сцены…');
+const THREE=await import('three');
+const {GLTFLoader}=await import('three/addons/loaders/GLTFLoader.js');
+let gltf=null;
+if(isMobile){
+/* смартфон: одна попытка, при недогрузе — статичные фоны */
+gltf=await loadGlb(GLTFLoader);
+if(!gltf){
+setLd('сцена не догрузилась — лёгкие фоны');
+await staticFallback();
+await Promise.race([document.fonts?document.fonts.ready:Promise.resolve(),sleep(1200)]);
+setLd('готово');
+hideLoader();
+return;
+}
+}else{
+/* десктоп: никаких заглушек — ждём 100% сколько потребуется */
+let attempt=0;
+while(!gltf){
+attempt++;
+if(attempt>1){
+ldBar.classList.add('ind');
+ldFill.style.width='0%';
+setLd('связь прервалась — пробуем ещё раз ('+attempt+')');
+await sleep(2000);
+}
+gltf=await loadGlb(GLTFLoader);
+}
+}
 ldBar.classList.remove('ind');
 ldFill.style.width='100%';
-const rest=Math.max(0,450-(performance.now()-bootAt));
-await new Promise(r=>setTimeout(r,rest));
+setLd('сцена загружена');
+await initScene(THREE,gltf);
+/* минимум 0,45 с на экране; ждём первые кадры и шрифты */
+await sleep(Math.max(0,450-(performance.now()-bootAt)));
 await Promise.all([
 document.fonts?document.fonts.ready:Promise.resolve(),
 new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))
@@ -949,13 +976,30 @@ new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))
 setLd('готово');
 hideLoader();
 }
-init3D().catch(e=>{
+/* десктоп не сдаётся даже при сбое библиотек или WebGL;
+смартфон в любой непонятной ситуации уходит на статичные фоны */
+(async()=>{
+if(isMobile){
+try{await boot();}
+catch(e){
 console.warn('3D недоступен:',e);
-setLd('ошибка 3d — работаем без сцены');
-setTimeout(hideLoader,900);
-});
-/* крайняя страховка: прелоадер ни при каких условиях не висит дольше 35 с */
-setTimeout(hideLoader,35000);
+setLd('сцена недоступна — лёгкие фоны');
+await staticFallback();
+await Promise.race([document.fonts?document.fonts.ready:Promise.resolve(),sleep(1200)]);
+setLd('готово');
+hideLoader();
+}
+}else{
+for(;;){
+try{await boot();return;}
+catch(e){
+console.warn('3D недоступен:',e);
+setLd('проблема со связью — пробуем ещё раз');
+await sleep(3000);
+}
+}
+}
+})();
 </script>
 </body>
 </html>

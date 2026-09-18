@@ -295,6 +295,171 @@ background:linear-gradient(to bottom, rgb(var(--scene-bg)) 0%, rgba(var(--scene-
 @media (prefers-reduced-motion:reduce){
 *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important}
 }
+
+
+
+
+/* =========================================================
+   +6px ко всем шрифтам, кроме:
+   - .h1 на первом экране;
+   - текста экранов 2–4: #stmtLayer .txt и #stmtLayer .kicker;
+   - кнопки внутри экранов 2–4.
+========================================================= */
+
+/* шапка / меню */
+.logo-txt{
+  font-size: calc(1.35rem + 6px);
+}
+
+.nl{
+  font-size: calc(0.8rem + 6px);
+}
+
+.nl sup{
+  font-size: calc(0.6rem + 6px);
+}
+
+.mmenu a{
+  font-size: clamp(
+    calc(2rem + 6px),
+    calc(8vw + 6px),
+    calc(3.4rem + 6px)
+  );
+}
+
+.mmenu a sup{
+  font-size: calc(0.8rem + 6px);
+}
+
+/* первый экран */
+.hero-side{
+  font-size: calc(0.62rem + 6px);
+}
+
+.hero-meta{
+  font-size: calc(0.72rem + 6px);
+}
+
+.hero-cap{
+  font-size: calc(0.62rem + 6px);
+}
+
+.btn{
+  font-size: calc(0.78rem + 6px);
+}
+
+.cue{
+  font-size: calc(0.58rem + 6px);
+}
+
+/* коллекция */
+.col-title{
+  font-size: clamp(
+    calc(1.9rem + 6px),
+    calc(4.4vw + 6px),
+    calc(3.6rem + 6px)
+  );
+}
+
+.col-title small{
+  font-size: calc(0.66rem + 6px);
+}
+
+.count{
+  font-size: calc(0.72rem + 6px);
+}
+
+.arr{
+  font-size: calc(1.1rem + 6px);
+}
+
+.size{
+  font-size: calc(0.7rem + 6px);
+}
+
+.add{
+  font-size: calc(0.62rem + 6px);
+}
+
+.card-meta h4{
+  font-size: calc(0.92rem + 6px);
+}
+
+.card-meta p{
+  font-size: calc(0.66rem + 6px);
+}
+
+.price{
+  font-size: calc(0.86rem + 6px);
+}
+
+.col-note{
+  font-size: calc(0.66rem + 6px);
+}
+
+/* футер коллекции */
+.bf-meta{
+  font-size: calc(0.66rem + 6px);
+}
+
+/* видео-экран */
+.vid-cap{
+  font-size: calc(0.62rem + 6px);
+}
+
+.vctl{
+  font-size: calc(0.9rem + 6px);
+}
+
+/* прелоадер */
+.ld-word{
+  font-size: clamp(
+    calc(2rem + 6px),
+    calc(6vw + 6px),
+    calc(3.4rem + 6px)
+  );
+}
+
+.ld-status{
+  font-size: calc(0.62rem + 6px);
+}
+
+/* тост */
+#toast{
+  font-size: calc(0.72rem + 6px);
+}
+
+/* уменьшенная шапка после первого экрана */
+body.scrolled .logo-txt{
+  font-size: calc(1.05rem + 6px);
+}
+
+body.scrolled .nl{
+  font-size: calc(0.72rem + 6px);
+}
+
+/* если кнопка появится внутри экранов 2–4 — оставляем её без +6px */
+#stmtLayer .btn{
+  font-size: 0.78rem;
+}
+
+/* Если хотите увеличить и огромную надпись в футере, раскомментируйте:
+   Но у неё есть автофит по ширине, поэтому эффект может быть малозаметен.
+
+.bf-word{
+  font-size: clamp(
+    calc(4rem + 6px),
+    calc(47vw + 6px),
+    calc(38rem + 6px)
+  );
+}
+
+*/
+
+  
+
+
+  
 </style>
 </head>
 <body>

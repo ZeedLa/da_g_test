@@ -10,7 +10,7 @@ DALOGO.svg        — логотип (верхний левый угол)
 asteriks.svg      — фирменный астериск (везде вместо глифа ✳, цвет зашит в сам файл)
 dagolf_scene.glb  — 3D-сцена, внутри камеры Camera1..Camera4
 static/           — запасные фоны смартфона на случай недогруза сцены:
-                    bg1.jpg…bg4.jpg — по одному на каждый из экранов 1–4
+bg1.jpg…bg4.jpg — по одному на каждый из экранов 1–4
 Items/            — фото коллекции: 9 изделий × 2 вида
 item_a1/item_a2 … item_i1/item_i2.jpg (1 = фронт, 2 = вид при наведении)
 brandvideo.mp4    — фильм бренда (экран после коллекции)
@@ -120,7 +120,9 @@ body.ready .h1 .ch{transform:none}
 .btn i{font-style:normal;transition:transform .35s cubic-bezier(.2,.9,.25,1)}
 .btn:hover{background:var(--ink);color:var(--paper)}
 .btn:hover i{transform:translateX(6px)}
-.cue{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;font-size:.58rem;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:var(--mut)}
+/* подсказка скролла видна только на первом экране (класс at-hero ставит applyView) */
+.cue{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;font-size:.58rem;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:var(--mut);opacity:0;transition:opacity .45s ease}
+body.at-hero .cue{opacity:1;transition-delay:.55s}
 .cue i{width:1px;height:46px;background:var(--line);position:relative;overflow:hidden;display:block}
 .cue i::after{content:'';position:absolute;left:0;top:-40%;width:100%;height:40%;background:var(--ink);animation:cue 1.8s cubic-bezier(.6,0,.4,1) infinite}
 @keyframes cue{to{top:110%}}
@@ -163,7 +165,10 @@ filter:blur(46px);}
 .arr:hover{background:var(--ink);color:var(--paper)}
 .arr[disabled]{opacity:.25;pointer-events:none}
 .count{font-size:.72rem;font-weight:600;letter-spacing:.14em;min-width:84px;text-align:center}
-.slider{overflow:hidden}
+/* слайдер: хватаем мышкой / свайпаем пальцем.
+touch-action:pan-y — вертикаль остаётся странице, горизонталь отдаётся JS */
+.slider{overflow:hidden;cursor:grab;user-select:none;-webkit-user-select:none;touch-action:pan-y}
+.slider.grabbing,.slider.grabbing *{cursor:grabbing}
 .track{display:flex;gap:24px;transition:transform .7s cubic-bezier(.22,.85,.25,1)}
 .card{flex:0 0 calc((100% - 72px)/4);opacity:0;transform:translateY(26px);transition:opacity .7s,transform .7s;transition-delay:var(--d,0s)}
 #colLayer.in .card{opacity:1;transform:none}
@@ -465,7 +470,7 @@ const PRODUCTS=[
 {code:'i', name:'Поло D09',    price:'13 700 ₽', desc:'пике'},
 ];
 /* =========================================================
-4. Слайдер
+4. Слайдер (+ драг мышкой на десктопе и свайп на смартфоне)
 ========================================================= */
 const track=$('#track');
 PRODUCTS.forEach((p,i)=>{
@@ -489,15 +494,20 @@ el.innerHTML=`
 </div>`;
 track.appendChild(el);
 });
-const prevB=$('#prev'),nextB=$('#next'),countEl=$('#count'),colLayer=$('#colLayer');
+const prevB=$('#prev'),nextB=$('#next'),countEl=$('#count'),colLayer=$('#colLayer'),sliderEl=$('.slider');
 let idxS=0,perView=4;
 const pad=n=>String(n).padStart(2,'0');
+const GAP=24;
 function calcPer(){perView=innerWidth>1150?4:innerWidth>760?2:1;}
+function calcStep(){
+const w=track.getBoundingClientRect().width;
+return (w-(perView-1)*GAP)/perView+GAP;
+}
+function sliderSet(x){track.style.transform=`translateX(${x}px)`;}
 function sliderGo(){
-const max=PRODUCTS.length-perView;idxS=clamp(idxS,0,max);
-const w=track.getBoundingClientRect().width,gap=24;
-const step=(w-(perView-1)*gap)/perView+gap;
-track.style.transform=`translateX(${-idxS*step}px)`;
+const max=Math.max(0,PRODUCTS.length-perView);idxS=clamp(idxS,0,max);
+track.style.transition='';                      /* возвращаем CSS-анимацию для доводки */
+sliderSet(-idxS*calcStep());
 countEl.textContent=`${pad(idxS+1)}–${pad(Math.min(idxS+perView,PRODUCTS.length))} / ${pad(PRODUCTS.length)}`;
 prevB.disabled=idxS===0;nextB.disabled=idxS>=max;
 }
@@ -505,10 +515,53 @@ prevB.addEventListener('click',()=>{idxS--;sliderGo();});
 nextB.addEventListener('click',()=>{idxS++;sliderGo();});
 addEventListener('resize',()=>{calcPer();sliderGo();});
 calcPer();sliderGo();
+/* ---------- драг мышкой (десктоп) и свайп (смартфон) ---------- */
+let dragging=false,dragX0=0,dragBase=0,dragDX=0,dragMoved=false;
+let vel=0,lastPX=0,lastPT=0,suppressClick=false;
+sliderEl.addEventListener('pointerdown',e=>{
+if(dragging||!e.isPrimary)return;
+if(e.pointerType==='mouse'&&e.button!==0)return;
+dragging=true;dragMoved=false;
+dragX0=lastPX=e.clientX;dragDX=0;vel=0;lastPT=performance.now();
+dragBase=-idxS*calcStep();
+track.style.transition='none';                  /* лента следует за рукой без анимации */
+sliderEl.classList.add('grabbing');
+});
+addEventListener('pointermove',e=>{
+if(!dragging)return;
+dragDX=e.clientX-dragX0;
+if(Math.abs(dragDX)>4)dragMoved=true;
+const step=calcStep(),max=Math.max(0,PRODUCTS.length-perView);
+let x=dragBase+dragDX;
+const lo=-max*step,hi=0;                        /* «резинка» на краях списка */
+if(x>hi)x=hi+(x-hi)*.3;
+if(x<lo)x=lo+(x-lo)*.3;
+sliderSet(x);
+const now=performance.now(),dt=now-lastPT;
+if(dt>0){vel=vel*.6+((e.clientX-lastPX)/dt)*.4;lastPX=e.clientX;lastPT=now;}
+});
+function endDrag(){
+if(!dragging)return;
+dragging=false;
+sliderEl.classList.remove('grabbing');
+const step=calcStep(),max=Math.max(0,PRODUCTS.length-perView);
+let target=Math.round(idxS-dragDX/step);        /* доводка до ближайшей позиции */
+if(Math.abs(vel)>.45&&Math.abs(dragDX)>10){     /* резкий бросок — ещё шаг по инерции */
+target=vel<0?Math.max(target,idxS+1):Math.min(target,idxS-1);
+}
+idxS=clamp(target,0,max);
+if(dragMoved){suppressClick=true;setTimeout(()=>suppressClick=false,300);}
+sliderGo();
+}
+addEventListener('pointerup',endDrag);
+addEventListener('pointercancel',endDrag);
+addEventListener('blur',endDrag);
+sliderEl.addEventListener('dragstart',e=>e.preventDefault());
 /* корзина */
 let cart=0;const toast=$('#toast');let toastT;
 function showToast(html){toast.innerHTML=html;toast.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>toast.classList.remove('show'),1900);}
 track.addEventListener('click',e=>{
+if(suppressClick){e.preventDefault();e.stopPropagation();return;} /* клик сразу после драга — игнор */
 const sizeB=e.target.closest('.size');
 if(sizeB){
 const card=sizeB.closest('.card');
@@ -568,6 +621,7 @@ colLayer.classList.toggle('on',idx===4);
 if(idx===4&&!colSeen){colSeen=true;colLayer.classList.add('in');sliderGo();}
 vidLayer.classList.toggle('on',idx===5);
 document.body.classList.toggle('scrolled',idx>0);
+document.body.classList.toggle('at-hero',idx===0); /* подсказка скролла — только на экране 1 */
 setCam(Math.min(idx,3));
 staticUpd();
 }
@@ -717,7 +771,6 @@ const hideLoader=()=>$('#loader').classList.add('done');
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 const bootAt=performance.now();
 const isMobile=matchMedia('(max-width:760px)').matches;
-
 function onGlbProgress(ev){
 if(ev.lengthComputable&&ev.total>0){
 /* сервер отдал размер файла — рисуем честные проценты */

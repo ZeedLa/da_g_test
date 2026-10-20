@@ -40,67 +40,66 @@
 </nav>
 
 <main class="item-main">
-  <div class="item-wrap">
-    <nav class="crumbs" aria-label="Назад к коллекции">
-      <a href="index.html?go=4"><i>←</i> коллекция</a>
-      <span class="crumbs-num" id="crumbNum">01 / 09</span>
-    </nav>
-
-    <article class="prod-grid">
-      <div class="prod-media">
-        <div class="prod-main" id="prodMain" title="Нажмите, чтобы сменить вид">
-          <img class="ph-a" id="prodImgA" alt="">
-          <img class="alt" id="prodImgB" alt="">
-          <span class="prod-tag">вид <b id="prodViewN">1</b> / 2</span>
-        </div>
-        <div class="prod-thumbs" id="prodThumbs">
-          <button class="pth on" data-v="0" aria-label="Вид 1"><img id="pthImgA" alt=""></button>
-          <button class="pth" data-v="1" aria-label="Вид 2"><img id="pthImgB" alt=""></button>
-        </div>
-      </div>
-
-      <div class="prod-info">
-        <p class="kicker prod-kicker"><b id="prodNum">01</b><img class="ast" src="asteriks.svg" alt="" aria-hidden="true" draggable="false">DA</p>
-        <h1 class="prod-title" id="prodTitle"></h1>
-        <p class="prod-price" id="prodPrice"></p>
-        <p class="prod-desc" id="prodDesc"></p>
-
-        <div class="prod-sizes" id="prodSizes" role="group" aria-label="Выбор размера">
-          <button class="size" data-s="S">S</button>
-          <button class="size" data-s="M">M</button>
-        </div>
-
-        <button class="btn prod-add" id="prodAdd">в корзину <i>→</i></button>
-
-        <ul class="prod-list" id="prodList"></ul>
-
-        <dl class="prod-meta">
-          <div><dt>Партия</dt><dd>001</dd></div>
-          <div><dt>Сезон</dt><dd>осень — зима '26</dd></div>
-          <div><dt>Уход</dt><dd>стирка 30 °C</dd></div>
-          <div><dt>Доставка</dt><dd>2–5 рабочих дней</dd></div>
-        </dl>
-
-        <div class="prod-pn">
-          <a class="pn" id="pnPrev" href="#"><i>←</i> <span></span></a>
-          <a class="pn" id="pnNext" href="#"><span></span> <i>→</i></a>
-        </div>
-      </div>
-    </article>
-
-    <section class="related">
-      <h3 class="rel-title">другие вещи</h3>
-      <div class="rel-row" id="relRow"></div>
-    </section>
+  <div class="i-head">
+    <a class="i-back" href="index.html?go=4"><i>←</i> коллекция</a>
+    <span class="i-count" id="iCount">01 / 09</span>
   </div>
 
-  <footer class="item-foot">
+  <h1 class="i-title" id="iTitle"></h1>
+
+  <div class="i-grid">
+    <figure class="i-media">
+      <div class="i-main" id="iMain" title="Нажмите, чтобы сменить вид">
+        <img class="ph-a" id="iImgA" alt="">
+        <img class="alt" id="iImgB" alt="">
+        <span class="i-tag">вид <b id="iViewN">1</b> / 2</span>
+      </div>
+      <div class="i-thumbs" id="iThumbs">
+        <button class="ith on" data-v="0" aria-label="Вид 1"><img id="ithImgA" alt=""></button>
+        <button class="ith" data-v="1" aria-label="Вид 2"><img id="ithImgB" alt=""></button>
+      </div>
+    </figure>
+
+    <div class="i-info">
+      <p class="kicker"><b id="iNum">01</b><img class="ast" src="asteriks.svg" alt="" aria-hidden="true" draggable="false">DA</p>
+      <p class="i-price" id="iPrice"></p>
+      <p class="i-desc" id="iDesc"></p>
+
+      <div class="i-sizes" id="iSizes" role="group" aria-label="Выбор размера">
+        <button class="size" data-s="S">S</button>
+        <button class="size" data-s="M">M</button>
+      </div>
+
+      <button class="btn" id="iAdd">в корзину <i>→</i></button>
+
+      <ul class="i-list" id="iList"></ul>
+
+      <dl class="i-meta">
+        <div><dt>Партия</dt><dd>001</dd></div>
+        <div><dt>Сезон</dt><dd>осень — зима '26</dd></div>
+        <div><dt>Уход</dt><dd>стирка 30 °C</dd></div>
+        <div><dt>Доставка</dt><dd>2–5 рабочих дней</dd></div>
+      </dl>
+
+      <div class="i-pn">
+        <a id="pnPrev" href="#"><i>←</i> <span></span></a>
+        <a id="pnNext" href="#"><span></span> <i>→</i></a>
+      </div>
+    </div>
+  </div>
+
+  <section class="i-related">
+    <h2 class="i-sub">другие вещи<small>коллекция №1 · осень — зима '26</small></h2>
+    <div class="rel-row" id="relRow"></div>
+  </section>
+
+  <footer class="big-foot">
     <div class="bf-meta">
       <span>© DAGOLF, 2026</span>
       <span></span>
       <span>telegram</span>
     </div>
-    <div class="if-word" aria-hidden="true">DAGOLF<sup>®</sup></div>
+    <div class="bf-word" aria-hidden="true"><span class="bf-fit">DAGOLF<sup>®</sup></span></div>
   </footer>
 </main>
 

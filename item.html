@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Вещь — DAGOLF</title>
+<!--
+Внутренняя страница вещи. Открывается как item.html?code=a … item.html?code=i
+Данные берёт из js/products.js, логику — из js/item.js.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="page-item scrolled">
+<div class="grain" aria-hidden="true"></div>
+
+<header class="topbar" id="topbar">
+  <a class="logo" href="index.html" aria-label="DAGOLF — на главную">
+    <img src="DALOGO.svg" alt="DALOGO" onerror="this.outerHTML='&lt;span class=&quot;logo-txt&quot;&gt;DALOGO&lt;sup&gt;&amp;reg;&lt;/sup&gt;&lt;/span&gt;'">
+  </a>
+  <nav class="nav" aria-label="Основное меню">
+    <a class="nl" href="index.html?go=1"><sup>01</sup><span>Каталог</span></a>
+    <a class="nl" href="index.html?go=2"><sup>02</sup><span>О бренде</span></a>
+    <a class="nl" href="index.html?go=3"><sup>03</sup><span>Контакты</span></a>
+    <a class="nl" href="index.html?go=4"><sup>04</sup><span>Избранное</span></a>
+    <a class="nl" href="index.html?go=4"><sup>05</sup><span>Корзина&thinsp;·&thinsp;<b class="cartN">0</b></span></a>
+  </nav>
+</header>
+
+<button class="burger" id="burger" aria-label="Меню" aria-expanded="false"><i></i><i></i><i></i></button>
+
+<nav class="mmenu" id="mmenu" aria-label="Мобильное меню">
+  <a href="index.html?go=1"><sup>01</sup>Каталог</a>
+  <a href="index.html?go=2"><sup>02</sup>О бренде</a>
+  <a href="index.html?go=3"><sup>03</sup>Контакты</a>
+  <a href="index.html?go=4"><sup>04</sup>Избранное</a>
+  <a href="index.html?go=4"><sup>05</sup>Корзина · <b class="cartN">0</b></a>
+</nav>
+
+<main class="item-main">
+  <div class="item-wrap">
+    <nav class="crumbs" aria-label="Назад к коллекции">
+      <a href="index.html?go=4"><i>←</i> коллекция</a>
+      <span class="crumbs-num" id="crumbNum">01 / 09</span>
+    </nav>
+
+    <article class="prod-grid">
+      <div class="prod-media">
+        <div class="prod-main" id="prodMain" title="Нажмите, чтобы сменить вид">
+          <img class="ph-a" id="prodImgA" alt="">
+          <img class="alt" id="prodImgB" alt="">
+          <span class="prod-tag">вид <b id="prodViewN">1</b> / 2</span>
+        </div>
+        <div class="prod-thumbs" id="prodThumbs">
+          <button class="pth on" data-v="0" aria-label="Вид 1"><img id="pthImgA" alt=""></button>
+          <button class="pth" data-v="1" aria-label="Вид 2"><img id="pthImgB" alt=""></button>
+        </div>
+      </div>
+
+      <div class="prod-info">
+        <p class="kicker prod-kicker"><b id="prodNum">01</b><img class="ast" src="asteriks.svg" alt="" aria-hidden="true" draggable="false">DA</p>
+        <h1 class="prod-title" id="prodTitle"></h1>
+        <p class="prod-price" id="prodPrice"></p>
+        <p class="prod-desc" id="prodDesc"></p>
+
+        <div class="prod-sizes" id="prodSizes" role="group" aria-label="Выбор размера">
+          <button class="size" data-s="S">S</button>
+          <button class="size" data-s="M">M</button>
+        </div>
+
+        <button class="btn prod-add" id="prodAdd">в корзину <i>→</i></button>
+
+        <ul class="prod-list" id="prodList"></ul>
+
+        <dl class="prod-meta">
+          <div><dt>Партия</dt><dd>001</dd></div>
+          <div><dt>Сезон</dt><dd>осень — зима '26</dd></div>
+          <div><dt>Уход</dt><dd>стирка 30 °C</dd></div>
+          <div><dt>Доставка</dt><dd>2–5 рабочих дней</dd></div>
+        </dl>
+
+        <div class="prod-pn">
+          <a class="pn" id="pnPrev" href="#"><i>←</i> <span></span></a>
+          <a class="pn" id="pnNext" href="#"><span></span> <i>→</i></a>
+        </div>
+      </div>
+    </article>
+
+    <section class="related">
+      <h3 class="rel-title">другие вещи</h3>
+      <div class="rel-row" id="relRow"></div>
+    </section>
+  </div>
+
+  <footer class="item-foot">
+    <div class="bf-meta">
+      <span>© DAGOLF, 2026</span>
+      <span></span>
+      <span>telegram</span>
+    </div>
+    <div class="if-word" aria-hidden="true">DAGOLF<sup>®</sup></div>
+  </footer>
+</main>
+
+<noscript><p style="padding:120px 24px;text-align:center">Для просмотра страницы включите JavaScript.</p></noscript>
+<div id="toast" role="status" aria-live="polite"></div>
+<script type="module" src="js/item.js"></script>
+</body>
+</html>

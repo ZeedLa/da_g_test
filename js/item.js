@@ -33,39 +33,43 @@ if(idx<0){location.replace('index.html?go=4');throw new Error('неизвест�
 const p=PRODUCTS[idx];
 
 document.title=`${p.name} · DAGOLF`;
-$('#crumbNum').textContent=`${pad(idx+1)} / ${pad(PRODUCTS.length)}`;
-$('#prodNum').textContent=pad(idx+1);
-$('#prodTitle').textContent=p.name;
-$('#prodPrice').textContent=p.price;
-$('#prodDesc').textContent=p.desc;
-$('#prodList').innerHTML=p.info.map(t=>`<li>${t}</li>`).join('');
+$('#iCount').textContent=`${pad(idx+1)} / ${pad(PRODUCTS.length)}`;
+$('#iNum').textContent=pad(idx+1);
+$('#iPrice').textContent=p.price;
+$('#iDesc').textContent=p.desc;
+$('#iList').innerHTML=p.info.map(t=>`<li>${t}</li>`).join('');
+
+/* заголовок: каждое слово — строка; первая залита, остальные контуром (как .h1) */
+$('#iTitle').innerHTML=p.name.split(' ').map((w,i)=>
+`<span class="line"><span style="--d:${(.1+i*.09).toFixed(2)}s">${w}</span></span>`
+).join('');
 
 const base=`Items/item_${p.code}`;
-$('#prodImgA').src=base+'1.jpg'; $('#prodImgA').alt=`${p.name} — вид 1`;
-$('#prodImgB').src=base+'2.jpg'; $('#prodImgB').alt=`${p.name} — вид 2`;
-$('#pthImgA').src=base+'1.jpg';  $('#pthImgB').src=base+'2.jpg';
+$('#iImgA').src=base+'1.jpg'; $('#iImgA').alt=`${p.name} — вид 1`;
+$('#iImgB').src=base+'2.jpg'; $('#iImgB').alt=`${p.name} — вид 2`;
+$('#ithImgA').src=base+'1.jpg'; $('#ithImgB').src=base+'2.jpg';
 
 /* ---------- галерея: вид 1 / вид 2 ---------- */
-function prodView(v){
-$('#prodMain').classList.toggle('show-b',v===1);
-$$('#prodThumbs .pth').forEach((b,i)=>b.classList.toggle('on',i===v));
-$('#prodViewN').textContent=v+1;
+function setView(v){
+$('#iMain').classList.toggle('show-b',v===1);
+$$('#iThumbs .ith').forEach((b,i)=>b.classList.toggle('on',i===v));
+$('#iViewN').textContent=v+1;
 }
-$('#prodMain').addEventListener('click',()=>prodView($('#prodMain').classList.contains('show-b')?0:1));
-$('#prodThumbs').addEventListener('click',e=>{
-const b=e.target.closest('.pth'); if(b)prodView(+b.dataset.v);
+$('#iMain').addEventListener('click',()=>setView($('#iMain').classList.contains('show-b')?0:1));
+$('#iThumbs').addEventListener('click',e=>{
+const b=e.target.closest('.ith'); if(b)setView(+b.dataset.v);
 });
 
 /* ---------- размеры ---------- */
-$('#prodSizes').addEventListener('click',e=>{
+$('#iSizes').addEventListener('click',e=>{
 const s=e.target.closest('.size'); if(!s)return;
-$$('#prodSizes .size').forEach(x=>x.classList.remove('on'));
+$$('#iSizes .size').forEach(x=>x.classList.remove('on'));
 s.classList.add('on');
 });
 
 /* ---------- в корзину ---------- */
-$('#prodAdd').addEventListener('click',()=>{
-let sel=$('#prodSizes .size.on')||$('#prodSizes .size[data-s="M"]');
+$('#iAdd').addEventListener('click',()=>{
+let sel=$('#iSizes .size.on')||$('#iSizes .size[data-s="M"]');
 sel.classList.add('on');
 cartAdd(1);
 showToast(`<b>${p.name}</b> · размер ${sel.dataset.s} — в корзине`);
@@ -80,10 +84,49 @@ pnPrev.querySelector('span').textContent=prevP.name;
 pnNext.href=`item.html?code=${nextP.code}`;
 pnNext.querySelector('span').textContent=nextP.name;
 
-/* ---------- другие вещи ---------- */
+/* ---------- другие вещи: те же карточки, что в коллекции ---------- */
 const rel=[...PRODUCTS.slice(idx+1),...PRODUCTS.slice(0,idx)].slice(0,4);
 $('#relRow').innerHTML=rel.map(r=>`
 <a class="rel-card" href="item.html?code=${r.code}">
-<span class="rel-img"><img src="Items/item_${r.code}1.jpg" alt="${r.name}" loading="lazy"></span>
-<span class="rel-meta"><b>${r.name}</b><i>${r.price}</i></span>
+<div class="card-img">
+<img class="ph-a" src="Items/item_${r.code}1.jpg" alt="${r.name}" loading="lazy" draggable="false">
+</div>
+<div class="card-meta">
+<div><h4>${r.name}</h4><p>${r.desc}</p></div>
+<span class="price">${r.price}</span>
+</div>
 </a>`).join('');
+
+/* =========================================================
+Автофит большой надписи в футере (тот же, что на главной)
+========================================================= */
+const bfWord=$('.bf-word'),bfFit=$('.bf-fit');
+if(bfWord&&bfFit){
+let bfLastWidth=0,bfRaf=0;
+const fitBigFoot=(force=false)=>{
+const avail=bfWord.getBoundingClientRect().width;
+if(!avail)return;
+if(!force&&bfLastWidth&&Math.abs(avail-bfLastWidth)<.5)return;
+const currentWidth=bfFit.getBoundingClientRect().width;
+if(!currentWidth)return;
+if(bfWord.style.fontSize&&Math.abs(avail-currentWidth)<=.6){bfLastWidth=avail;return;}
+const currentSize=parseFloat(getComputedStyle(bfWord).fontSize);
+if(!currentSize)return;
+bfWord.style.fontSize=(currentSize*(avail/currentWidth)).toFixed(3)+'px';
+bfLastWidth=avail;
+};
+const scheduleFit=(force=false)=>{
+cancelAnimationFrame(bfRaf);
+bfRaf=requestAnimationFrame(()=>fitBigFoot(force));
+};
+scheduleFit(true);
+addEventListener('resize',()=>scheduleFit(true));
+addEventListener('load',()=>scheduleFit(true));
+if(document.fonts&&document.fonts.ready)document.fonts.ready.then(()=>scheduleFit(true));
+if('ResizeObserver' in window){
+new ResizeObserver(()=>{
+const w=bfWord.getBoundingClientRect().width;
+if(w&&(!bfLastWidth||Math.abs(w-bfLastWidth)>.5))scheduleFit(true);
+}).observe(bfWord);
+}
+}

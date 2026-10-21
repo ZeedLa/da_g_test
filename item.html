@@ -7,7 +7,7 @@
 <!--
 Внутренняя страница вещи. Открывается как item.html?code=a … item.html?code=i
 Данные берёт из js/products.js, логику — из js/item.js.
-Галерея: свайп/стрелки — смена вида, клик/тап — зум с панорамой.
+Галерея: стрелки/свайп/миниатюры — смена вида; лупа или клик — приближение.
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -50,19 +50,33 @@
 
   <div class="i-grid">
     <figure class="i-media">
-      <div class="i-main" id="iMain" tabindex="0" role="group" aria-label="Галерея вещи: два вида" title="Свайп — сменить вид · клик — приблизить">
+      <div class="i-main" id="iMain" tabindex="0" role="group"
+           aria-label="Галерея вещи: два вида. Стрелки — смена вида, лупа — приближение.">
         <img class="ph-a is-on" id="iImgA" alt="" draggable="false">
         <img class="alt" id="iImgB" alt="" draggable="false">
+        <div class="i-ctl">
+          <button type="button" class="ic" id="iPrev" aria-label="Предыдущий вид">←</button>
+          <button type="button" class="ic i-zoom" id="iZoom" aria-label="Приблизить" aria-pressed="false">
+            <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <circle cx="10.5" cy="10.5" r="6.5"></circle>
+              <path d="M15.6 15.6 21 21"></path>
+              <path d="M7.5 10.5h6"></path>
+              <path class="zv" d="M10.5 7.5v6"></path>
+            </svg>
+          </button>
+          <button type="button" class="ic" id="iNext" aria-label="Следующий вид">→</button>
+        </div>
       </div>
       <div class="i-rail">
         <div class="i-thumbs" id="iThumbs">
-          <button class="ith on" data-v="0" aria-label="Вид 1"><img id="ithImgA" alt=""></button>
-          <button class="ith" data-v="1" aria-label="Вид 2"><img id="ithImgB" alt=""></button>
+          <button type="button" class="ith on" data-v="0" aria-label="Вид 1"><img id="ithImgA" alt=""></button>
+          <button type="button" class="ith" data-v="1" aria-label="Вид 2"><img id="ithImgB" alt=""></button>
         </div>
         <div class="i-count2"><b id="iViewN">01</b>&thinsp;/&thinsp;02</div>
       </div>
       <div class="i-progress" aria-hidden="true"><i id="iProg"></i></div>
-      <p class="i-note"><img class="ast" src="asteriks.svg" alt="" aria-hidden="true" draggable="false"> свайп — другой вид · клик — приблизить</p>
+      <p class="i-note"><img class="ast" src="asteriks.svg" alt="" aria-hidden="true" draggable="false"> стрелки — другой вид · лупа или клик — приблизить</p>
     </figure>
 
     <div class="i-info">

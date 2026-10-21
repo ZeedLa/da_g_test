@@ -178,13 +178,11 @@ s.classList.add('on');
 });
 
 /* ---------- в корзину ---------- */
-$('#iAdd')?.addEventListener('click',()=>{
-let sel=$('#iSizes .size.on')||$('#iSizes .size[data-s="M"]');
-if(!sel)return;
-sel.classList.add('on');
-addToCart(p.code, sel.dataset.s);
-showToast(`<b>${p.name}</b> · размер ${sel.dataset.s} — в корзине`);
-});
+const addBtn=$('#iAdd');
+if(addBtn){
+addBtn.setAttribute('data-add-to-cart','');
+addBtn.dataset.code=p.code; /* размер возьмётся из выбранного .size.on в #iSizes */
+}
 
 /* ---------- пред./след. вещь ---------- */
 const prevP=PRODUCTS[(idx-1+PRODUCTS.length)%PRODUCTS.length];

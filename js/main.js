@@ -174,8 +174,16 @@ addEventListener('blur',endDrag);
 sliderEl.addEventListener('dragstart',e=>e.preventDefault());
 
 /* тост */
-const toast=$('#toast');let toastT;
-function showToast(html){toast.innerHTML=html;toast.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>toast.classList.remove('show'),1900);}
+/* тост: ретриггер, не блокирует клики, не обрезается */
+const toast=$('#toast'),toastMsg=$('#toastMsg');let toastT;
+function showToast(html){
+toastMsg.innerHTML=html;
+toast.classList.remove('show');
+void toast.offsetWidth; /* перезапуск анимации при повторном добавлении */
+toast.classList.add('show');
+clearTimeout(toastT);
+toastT=setTimeout(()=>toast.classList.remove('show'),2600);
+}
 
 /* клики по карточкам: размеры/корзина — на месте, всё остальное — на страницу вещи */
 track.addEventListener('click',e=>{

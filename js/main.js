@@ -3,7 +3,7 @@ js/main.js — логика главной страницы (index.html)
 Каталог — в products.js, корзина — в cart.js.
 ========================================================= */
 import {PRODUCTS} from './products.js';
-import {cartAdd,syncBadges} from './cart.js';
+import {addToCart,syncBadges} from './cart.js';
 
 /* =========================================================
 0. Утилиты
@@ -200,7 +200,7 @@ const card=addB.closest('.card');
 const i=[...track.children].indexOf(card);
 let sel=card.querySelector('.size.on');
 if(!sel){sel=card.querySelector('.size[data-s="M"]');sel.classList.add('on');}
-cartAdd(1);
+addToCart(PRODUCTS[i].code, sel.dataset.s);
 showToast(`<b>${PRODUCTS[i].name}</b> · размер ${sel.dataset.s} — в корзине`);
 return;
 }

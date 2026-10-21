@@ -7,6 +7,7 @@
 <!--
 Внутренняя страница вещи. Открывается как item.html?code=a … item.html?code=i
 Данные берёт из js/products.js, логику — из js/item.js.
+Галерея: свайп/стрелки — смена вида, клик/тап — зум с панорамой.
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -49,15 +50,19 @@
 
   <div class="i-grid">
     <figure class="i-media">
-      <div class="i-main" id="iMain" title="Нажмите, чтобы сменить вид">
-        <img class="ph-a" id="iImgA" alt="">
-        <img class="alt" id="iImgB" alt="">
-        <span class="i-tag">вид <b id="iViewN">1</b> / 2</span>
+      <div class="i-main" id="iMain" tabindex="0" role="group" aria-label="Галерея вещи: два вида" title="Свайп — сменить вид · клик — приблизить">
+        <img class="ph-a is-on" id="iImgA" alt="" draggable="false">
+        <img class="alt" id="iImgB" alt="" draggable="false">
       </div>
-      <div class="i-thumbs" id="iThumbs">
-        <button class="ith on" data-v="0" aria-label="Вид 1"><img id="ithImgA" alt=""></button>
-        <button class="ith" data-v="1" aria-label="Вид 2"><img id="ithImgB" alt=""></button>
+      <div class="i-rail">
+        <div class="i-thumbs" id="iThumbs">
+          <button class="ith on" data-v="0" aria-label="Вид 1"><img id="ithImgA" alt=""></button>
+          <button class="ith" data-v="1" aria-label="Вид 2"><img id="ithImgB" alt=""></button>
+        </div>
+        <div class="i-count2"><b id="iViewN">01</b>&thinsp;/&thinsp;02</div>
       </div>
+      <div class="i-progress" aria-hidden="true"><i id="iProg"></i></div>
+      <p class="i-note"><img class="ast" src="asteriks.svg" alt="" aria-hidden="true" draggable="false"> свайп — другой вид · клик — приблизить</p>
     </figure>
 
     <div class="i-info">
@@ -104,7 +109,12 @@
 </main>
 
 <noscript><p style="padding:120px 24px;text-align:center">Для просмотра страницы включите JavaScript.</p></noscript>
-<div id="toast" role="status" aria-live="polite"></div>
+
+<div id="toast" role="status" aria-live="polite">
+  <img class="t-ast" src="asteriks.svg" alt="" aria-hidden="true" draggable="false">
+  <span id="toastMsg"></span>
+</div>
+
 <script type="module" src="js/item.js"></script>
 </body>
 </html>

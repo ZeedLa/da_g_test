@@ -86,7 +86,9 @@ const closeMenu=()=>{document.body.classList.remove('menu-open');burger.setAttri
 const track=$('#track');
 PRODUCTS.forEach((p,i)=>{
 const el=document.createElement('article');
-el.className='card';el.style.setProperty('--d',(i%4)*0.09+'s');
+el.className='card';
+el.dataset.productCode=p.code; /* код вещи для cart.js */
+el.style.setProperty('--d',(i%4)*0.09+'s');
 el.tabIndex=0;
 el.setAttribute('role','link');
 el.setAttribute('aria-label',`${p.name} — открыть страницу вещи`);
@@ -99,7 +101,7 @@ el.innerHTML=`
 <button class="size" data-s="S">S</button>
 <button class="size" data-s="M">M</button>
 </div>
-<button class="add">в корзину</button>
+<button class="add" data-add-to-cart>в корзину</button>
 </div>
 </div>
 <div class="card-meta">
@@ -192,18 +194,11 @@ const sizeB=e.target.closest('.size');
 if(sizeB){
 const card=sizeB.closest('.card');
 card.querySelectorAll('.size').forEach(s=>s.classList.remove('on'));
-sizeB.classList.add('on');return;
-}
-const addB=e.target.closest('.add');
-if(addB){
-const card=addB.closest('.card');
-const i=[...track.children].indexOf(card);
-let sel=card.querySelector('.size.on');
-if(!sel){sel=card.querySelector('.size[data-s="M"]');sel.classList.add('on');}
-addToCart(PRODUCTS[i].code,sel.dataset.s);
-showToast(`<b>${PRODUCTS[i].name}</b> · размер ${sel.dataset.s} — в корзине`);
+sizeB.classList.add('on');
 return;
 }
+/* добавление обрабатывает cart.js по data-add-to-cart — здесь ничего не делаем */
+if(e.target.closest('[data-add-to-cart]'))return;
 const card=e.target.closest('.card');
 if(card){
 const i=[...track.children].indexOf(card);

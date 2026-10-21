@@ -607,3 +607,76 @@ calc(38rem + 6px)
 @media (min-width:761px){
 .i-ctl .ic{font-size:calc(1rem + 6px)}
 }
+
+/* =========================================================
+КОРЗИНА (cart.html) — тот же язык: поля 34px, линейки,
+капс-подписи, гигантские заголовки, контурный футер.
+========================================================= */
+.cart-main{padding:11vh 34px 0}
+.c-grid{display:grid;grid-template-columns:1.55fr .85fr;gap:clamp(2.4rem,6vw,7rem);align-items:start}
+@keyframes cIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+.c-grid,.c-empty,.c-done{animation:cIn .8s cubic-bezier(.2,.8,.2,1) both}
+/* позиции */
+.c-items{border-top:1.5px solid var(--ink)}
+.c-item{display:grid;grid-template-columns:96px minmax(0,1fr) auto;gap:1.8rem;padding:1.7rem 0;border-bottom:1px solid var(--line);align-items:center}
+.c-img{position:relative;width:96px;aspect-ratio:3/3.9;border:1px solid var(--line);overflow:hidden;background:var(--paper-2);display:block}
+.c-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .8s cubic-bezier(.2,.8,.2,1)}
+.c-item:hover .c-img img{transform:scale(1.04)}
+.c-meta h3{font-size:.92rem;font-weight:700;letter-spacing:.01em}
+.c-meta h3 a{transition:color .3s}
+.c-meta h3 a:hover{color:var(--accent)}
+.c-meta p{font-size:.66rem;font-weight:500;color:var(--mut);margin-top:.35rem;letter-spacing:.06em;text-transform:uppercase}
+.c-ctrl{display:flex;align-items:center;gap:1.8rem;justify-self:end}
+.c-qty{display:flex;align-items:center;border:1.5px solid var(--ink)}
+.cq{width:36px;height:36px;display:grid;place-items:center;font-size:.95rem;font-weight:600;transition:background .25s,color .25s}
+.cq:hover{background:var(--ink);color:var(--paper)}
+.cq-num{width:42px;height:36px;display:grid;place-items:center;font-size:.8rem;font-weight:700;font-variant-numeric:tabular-nums;border-left:1px solid var(--line);border-right:1px solid var(--line)}
+.c-price{font-size:.9rem;font-weight:700;font-variant-numeric:tabular-nums;min-width:7ch;text-align:right}
+.c-rm{font-size:.6rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--mut);padding-bottom:2px;border-bottom:1px solid transparent;transition:color .3s,border-color .3s}
+.c-rm:hover{color:var(--ink);border-color:var(--ink)}
+/* итог */
+.c-sum{align-self:start}
+@media (min-width:901px){.c-sum{position:sticky;top:84px}}
+.c-sumrow{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;padding:.95rem 0;border-bottom:1px solid var(--line)}
+.c-sumrow dt{font-size:.66rem;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--mut)}
+.c-sumrow dd{font-size:.9rem;font-weight:700;font-variant-numeric:tabular-nums}
+.c-total{display:flex;justify-content:space-between;align-items:baseline;gap:1rem;padding:1.3rem 0;border-bottom:1.5px solid var(--ink)}
+.c-total dt{font-size:.66rem;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--mut)}
+.c-total dd{font-size:1.5rem;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.c-hint{margin-top:.9rem;font-size:.6rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--mut)}
+.c-hint b{color:var(--accent)}
+.c-order{margin-top:1.8rem;width:100%;justify-content:center}
+.c-note{margin-top:1.1rem;font-size:.6rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--mut)}
+.c-note .ast{vertical-align:-.14em}
+/* пустая корзина и «готово» */
+.c-empty,.c-done{padding:2rem 0 4rem}
+.c-msg{font-size:.72rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);margin:-1.6rem 0 2.4rem}
+.c-msg b{color:var(--ink)}
+
+@media (max-width:900px){
+.c-grid{grid-template-columns:1fr;gap:2.6rem}
+}
+@media (max-width:760px){
+.cart-main{padding:12vh 20px 0}
+.c-item{grid-template-columns:72px minmax(0,1fr);column-gap:1.2rem;row-gap:1.1rem}
+.c-img{width:72px;grid-row:1 / 3}
+.c-ctrl{grid-column:2;justify-self:stretch;justify-content:flex-start;flex-wrap:wrap;gap:1.2rem}
+.c-price{min-width:0;text-align:left}
+.c-rm{margin-left:auto}
+}
+/* +6px для корзины — только десктоп, как и весь блок шрифтов */
+@media (min-width:761px){
+.c-meta h3{font-size:calc(.92rem + 6px)}
+.c-meta p{font-size:calc(.66rem + 6px)}
+.cq{font-size:calc(.95rem + 6px)}
+.cq-num{font-size:calc(.8rem + 6px)}
+.c-price{font-size:calc(.9rem + 6px)}
+.c-rm{font-size:calc(.6rem + 6px)}
+.c-sumrow dt{font-size:calc(.66rem + 6px)}
+.c-sumrow dd{font-size:calc(.9rem + 6px)}
+.c-total dt{font-size:calc(.66rem + 6px)}
+.c-total dd{font-size:calc(1.5rem + 6px)}
+.c-hint{font-size:calc(.6rem + 6px)}
+.c-note{font-size:calc(.6rem + 6px)}
+.c-msg{font-size:calc(.72rem + 6px)}
+}

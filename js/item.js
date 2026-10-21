@@ -4,7 +4,7 @@ js/item.js — логика страницы вещи (item.html?code=…)
 Каждый раздел защищён: отсутствие элемента не роняет страницу.
 ========================================================= */
 import {PRODUCTS} from './products.js';
-import {cartAdd,syncBadges} from './cart.js';
+import {addToCart,syncBadges} from './cart.js';
 
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const pad=n=>String(n).padStart(2,'0');
@@ -182,7 +182,7 @@ $('#iAdd')?.addEventListener('click',()=>{
 let sel=$('#iSizes .size.on')||$('#iSizes .size[data-s="M"]');
 if(!sel)return;
 sel.classList.add('on');
-cartAdd(1);
+addToCart(p.code, sel.dataset.s);
 showToast(`<b>${p.name}</b> · размер ${sel.dataset.s} — в корзине`);
 });
 

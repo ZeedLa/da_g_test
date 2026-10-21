@@ -589,3 +589,21 @@ calc(38rem + 6px)
 }
 */
 }
+
+/* =========================================================
+Галерея вещи: панель управления поверх фото
+========================================================= */
+.i-media{margin:0}
+.i-ctl{position:absolute;right:12px;bottom:12px;display:flex;gap:8px;z-index:2}
+.i-ctl .ic{width:46px;height:46px;border:1.5px solid var(--ink);background:var(--paper);color:var(--ink);display:grid;place-items:center;font-size:1rem;line-height:1;transition:background .3s,color .3s,transform .15s}
+.i-ctl .ic:hover{background:var(--ink);color:var(--paper)}
+.i-ctl .ic:active{transform:scale(.93)}
+.i-ctl .ic svg{display:block}
+/* в приближённом состоянии плюс на лупе превращается в минус */
+.i-zoom.on .zv{display:none}
+@media (max-width:760px){
+.i-ctl .ic{width:42px;height:42px}
+}
+@media (min-width:761px){
+.i-ctl .ic{font-size:calc(1rem + 6px)}
+}

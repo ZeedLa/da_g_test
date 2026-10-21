@@ -15,11 +15,21 @@ try{localStorage.setItem(KEY,JSON.stringify(list));}catch(e){}
 syncBadges();
 }
 export function addToCart(code,size){
+if(!code||!size){
+console.error('DAGOLF: addToCart(code,size) вызван без кода вещи или размера');
+return cartCount();
+}
 const items=getItems();
 const f=items.find(i=>i.code===code&&i.size===size);
 if(f)f.qty+=1;else items.push({code,size,qty:1});
 saveItems(items);
 return cartCount();
+}
+/* старое имя оставлено только затем, чтобы необновлённые скрипты
+не падали молча: пишет в консоль, что нужно обновить вызов */
+export function cartAdd(){
+console.error('DAGOLF: cartAdd() устарел. В main.js / item.js замените вызов на addToCart(код вещи, размер).');
+return 0;
 }
 export function setQty(code,size,qty){
 let items=getItems();
